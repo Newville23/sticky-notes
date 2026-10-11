@@ -31,6 +31,12 @@ devDependencies:
   eslint:
     specifier: ^10.10.0
     version: 10.10.0
+  eslint-config-prettier:
+    specifier: ^10.1.8
+    version: 10.1.8(eslint@10.10.0)
+  eslint-plugin-prettier:
+    specifier: ^5.2.6
+    version: 5.2.6(eslint-config-prettier@10.1.8)(eslint@10.10.0)(prettier@3.9.9)
   eslint-plugin-react-hooks:
     specifier: ^7.1.1
     version: 7.1.1(eslint@10.10.0)
@@ -40,6 +46,9 @@ devDependencies:
   globals:
     specifier: ^17.12.0
     version: 17.12.0
+  prettier:
+    specifier: ^3.9.9
+    version: 3.9.9
   typescript:
     specifier: ~6.0.2
     version: 6.0.2
@@ -362,6 +371,11 @@ packages:
 
   /@oxc-project/types@0.153.0:
     resolution: {integrity: sha512-jSNrRIyvPVLL5E1z/tS5zLAprosGz/FuI1PWwEOz59j3E4TTTzSpqKb/RDGqJhhW0QHYISGXxq582wGx6T11Tw==}
+    dev: true
+
+  /@pkgr/core@0.2.9:
+    resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
+    engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
     dev: true
 
   /@rolldown/binding-android-arm-eabi@1.2.13:
@@ -814,6 +828,36 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  /eslint-config-prettier@10.1.8(eslint@10.10.0):
+    resolution: {integrity: sha512-82GZUjRS0p/jganf6q1rEO25VSoHH0hKPCTrgillPjdI/3bgBhAE1QzHrHTizjpRvy6pGAvKjDJtk2pF9NDq8w==}
+    hasBin: true
+    peerDependencies:
+      eslint: '>=7.0.0'
+    dependencies:
+      eslint: 10.10.0
+    dev: true
+
+  /eslint-plugin-prettier@5.2.6(eslint-config-prettier@10.1.8)(eslint@10.10.0)(prettier@3.9.9):
+    resolution: {integrity: sha512-mUcf7QG2Tjk7H055Jk0lGBjbgDnfrvqjhXh9t2xLMSCjZVcw9Rb1V6sVNXO0th3jgeO7zllWPTNRil3JW94TnQ==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      '@types/eslint': '>=8.0.0'
+      eslint: '>=8.0.0'
+      eslint-config-prettier: '>= 7.0.0 <10.0.0 || >=10.1.0'
+      prettier: '>=3.0.0'
+    peerDependenciesMeta:
+      '@types/eslint':
+        optional: true
+      eslint-config-prettier:
+        optional: true
+    dependencies:
+      eslint: 10.10.0
+      eslint-config-prettier: 10.1.8(eslint@10.10.0)
+      prettier: 3.9.9
+      prettier-linter-helpers: 1.0.0
+      synckit: 0.11.12
+    dev: true
+
   /eslint-plugin-react-hooks@7.1.1(eslint@10.10.0):
     resolution: {integrity: sha512-f2I7Gw6JbvCexzIInuSbZpfdQ44D7iqdWX01FKLvrPgqxoE7oMj8clOfto8U6vYiz4yd5oKu39rRSVOe1zRu0g==}
     engines: {node: '>=18'}
@@ -937,6 +981,10 @@ packages:
 
   /fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
+    dev: true
+
+  /fast-diff@1.3.0:
+    resolution: {integrity: sha512-VxPP4NqbUjj6MaAOafWeUn2cXWLcCtljklUtZf0Ind4XQ+QPtmA0b18zZy0jIQx+ExRVCR/ZQpBmik5lXshNsw==}
     dev: true
 
   /fast-json-stable-stringify@2.1.0:
@@ -1320,6 +1368,19 @@ packages:
     engines: {node: '>= 0.8.0'}
     dev: true
 
+  /prettier-linter-helpers@1.0.0:
+    resolution: {integrity: sha512-GbK2cP9nraSSUF9N2XwUwqfzlAFlMNYYl+ShE/V+H8a9uNl/oUqB1w2EL54Jh0OlyRSd8RfWYJ3coVS4TROP2w==}
+    engines: {node: '>=6.0.0'}
+    dependencies:
+      fast-diff: 1.3.0
+    dev: true
+
+  /prettier@3.9.9:
+    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
+
   /punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
@@ -1401,6 +1462,13 @@ packages:
   /source-map-js@1.2.2:
     resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
+    dev: true
+
+  /synckit@0.11.12:
+    resolution: {integrity: sha512-Bh7QjT8/SuKUIfObSXNHNSK6WHo6J1tHCqJsuaFDP7gP0fkzSfTxI8y85JrppZ0h8l0maIgc2tfuZQ6/t3GtnQ==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    dependencies:
+      '@pkgr/core': 0.2.9
     dev: true
 
   /tinyglobby@0.2.17:

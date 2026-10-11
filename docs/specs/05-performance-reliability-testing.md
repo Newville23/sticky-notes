@@ -37,17 +37,17 @@ Interaction tests must verify:
 - Pointer capture lifecycle.
 - Drag and resize behavior.
 - `pointercancel` rollback.
-- No Zustand writes during `pointermove`.
+- No React state updates or Zustand writes during `pointermove`.
 - A single state commit on interaction completion.
 - Unrelated notes do not rerender when another note changes.
 
-Browser smoke tests must run on the latest supported Chrome and Firefox versions at a minimum viewport of `1024 × 768`.
+Manual browser smoke tests must run on the latest supported Chrome and Firefox versions at a minimum viewport of `1024 × 768`.
 
 ## Acceptance Criteria
 
 **Given** an active drag or resize  
 **When** `pointermove` occurs  
-**Then** no React or Zustand state update is triggered.
+**Then** zero React state updates and zero Zustand writes occur; only refs and the active note's DOM styles may change.
 
 **Given** an interaction completes  
 **When** `pointerup` occurs  
@@ -59,4 +59,4 @@ Browser smoke tests must run on the latest supported Chrome and Firefox versions
 
 **Given** the automated test suite  
 **When** it runs  
-**Then** core geometry, state operations, interaction behavior, and supported-browser smoke tests pass.
+**Then** core geometry, state operations, interaction behavior pass.

@@ -10,7 +10,8 @@ Allow the user to move an existing note within the canvas by dragging it.
 - Pointer capture must be used during the interaction.
 - Initial pointer position, note position, note bounds, and canvas bounds must be cached at drag start.
 - `pointermove` must update the note visually using `transform`.
-- React and Zustand state must not be updated during movement.
+- During `pointermove`, there must be zero React state updates and zero Zustand writes.
+- `pointermove` may update only interaction refs and the active note's DOM styles.
 - Note coordinates must be clamped so the full note remains inside the canvas.
 - Final coordinates must be committed to global state only on `pointerup`.
 - `pointercancel` must restore the persisted position and clear the interaction.
