@@ -1,32 +1,57 @@
-# Note Creation
+# Note Creation and Content Entry
 
 ## Goal
-Allow the user to create one note at a time inside the canvas using the active toolbar configuration.
+Allow the user to explicitly create one note at a time using the active toolbar
+configuration and immediately enter its content.
 
 ## Rules
 
 - default configuration is `S` size and yellow background.
 - toolbar allows selecting `S`, `M`, `L`, or `XL` before creation.
-- a note is created by clicking an empty position inside the canvas.
-- the pointer position determines the initial note position.
+- toolbar provides an explicit `Add note` button.
+- the `Add note` button is the only note-creation mechanism.
+- clicking an empty position inside the canvas must not create a note.
+- the first note is centered in the canvas using its selected dimensions.
+- subsequent notes use a deterministic diagonal cascading offset from the previous creation position so changing the selected size does not reset or reverse the cascade.
+- placement must not depend on the pointer position.
 - the complete note must remain inside canvas boundaries.
 - each note must receive a unique immutable ID (crypto.randomUUID).
 - the new note must be added to both `notesById` and `noteIds`.
+- each note provides a text editor for its content.
+- the newly created note editor receives focus immediately after mounting.
+- content editing remains local to the note while typing.
+- note content is committed to Zustand when the editor loses focus, not on every keystroke.
 
 ## Acceptance Criteria
 
 **Given** the default toolbar configuration  
-**When** the user clicks inside the canvas  
-**Then** one `S`, yellow note is created at the calculated pointer position.
+**When** the user activates `Add note`  
+**Then** one `S`, yellow note is created at a deterministic position inside the canvas.
 
 **Given** a selected size or color  
-**When** a note is created  
+**When** the user activates `Add note`  
 **Then** the note uses the selected configuration.
 
-**Given** a creation position near a canvas boundary  
-**When** the note would exceed the canvas  
+**Given** a calculated creation position that would exceed a canvas boundary  
+**When** the note is created  
 **Then** its initial position is clamped so the complete note remains visible.
 
 **Given** a note already exists  
-**When** another note is created  
+**When** the user activates `Add note` again  
 **Then** the existing note remains unchanged and a new unique note is added.
+
+**Given** a newly created note  
+**When** it mounts inside the canvas  
+**Then** its content editor receives focus and is ready for text entry.
+
+**Given** a user is typing note content  
+**When** the editor value changes  
+**Then** no Zustand write occurs for each keystroke.
+
+**Given** edited note content  
+**When** the editor loses focus  
+**Then** the final content is committed once to that note without rerendering unrelated notes.
+
+**Given** any canvas state  
+**When** the user clicks an empty canvas position  
+**Then** no note is created.

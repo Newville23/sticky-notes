@@ -6,7 +6,8 @@ Allow the user to move an existing note within the canvas by dragging it.
 
 ## Rules
 
-- Dragging starts on `pointerdown`.
+- Dragging starts on `pointerdown` over the draggable note surface.
+- Pointer activity inside the note content editor must not start dragging.
 - Pointer capture must be used during the interaction.
 - Initial pointer position, note position, note bounds, and canvas bounds must be cached at drag start.
 - `pointermove` must update the note visually using `transform`.
@@ -33,3 +34,7 @@ Allow the user to move an existing note within the canvas by dragging it.
 **Given** an active drag  
 **When** `pointercancel` occurs  
 **Then** the note returns to its last persisted position.
+
+**Given** a note content editor  
+**When** the user places the pointer inside the editor  
+**Then** the user can edit or select content without starting a drag.

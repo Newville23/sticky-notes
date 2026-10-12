@@ -1,0 +1,30 @@
+.note {
+  --note-border-color: rgb(32 40 50 / 10%);
+  --note-shadow-color: rgb(36 43 50 / 16%);
+  --note-inset-color: rgb(83 65 16 / 8%);
+
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: var(--note-width);
+  height: var(--note-height);
+  border: 1px solid var(--note-border-color);
+  border-radius: 5px 5px 12px;
+  box-shadow:
+    inset -12px -12px 0 var(--note-inset-color),
+    0 12px 24px var(--note-shadow-color);
+  transform: translate3d(var(--note-x), var(--note-y), 0);
+}
+
+.note--yellow {
+  background: var(--color-note-yellow);
+}
+
+.note--green {
+  background: var(--color-note-green);
+}
+
+.note--red {
+  background: var(--color-note-red);
+}

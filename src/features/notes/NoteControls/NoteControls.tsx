@@ -17,9 +17,13 @@ export interface NoteControlsProps {
   readonly onConfigurationChange: (
     configuration: NoteCreationConfiguration,
   ) => void
+  readonly onAddNote: () => void
 }
 
-export function NoteControls({ onConfigurationChange }: NoteControlsProps) {
+export function NoteControls({
+  onConfigurationChange,
+  onAddNote,
+}: NoteControlsProps) {
   const [configuration, setConfiguration] = useState<NoteCreationConfiguration>(
     DEFAULT_NOTE_CREATION_CONFIGURATION,
   )
@@ -92,6 +96,15 @@ export function NoteControls({ onConfigurationChange }: NoteControlsProps) {
           ))}
         </div>
       </fieldset>
+
+      <div className="note-controls__divider" aria-hidden="true"></div>
+
+      <button className="note-controls__add" type="button" onClick={onAddNote}>
+        <span className="note-controls__add-icon" aria-hidden="true">
+          +
+        </span>
+        Add note
+      </button>
     </div>
   )
 }

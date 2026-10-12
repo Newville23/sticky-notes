@@ -1,5 +1,6 @@
 import {
   calculateDragPosition,
+  calculateNoteCreationPosition,
   calculateResizeDimensions,
   clamp,
   clampPosition,
@@ -78,6 +79,86 @@ describe('geometry', () => {
           canvasDimensions: [600, 400],
         }),
       ).toEqual([440, 240])
+    })
+  })
+
+  describe('calculateNoteCreationPosition', () => {
+    it('centers the first note inside the canvas', () => {
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [160, 160],
+          canvasDimensions: [600, 400],
+        }),
+      ).toEqual([220, 120])
+    })
+
+    it('cascades from the previous creation position', () => {
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [160, 160],
+          canvasDimensions: [600, 400],
+          previousPosition: [220, 120],
+        }),
+      ).toEqual([244, 144])
+    })
+
+    it('preserves the cascade direction when the note size increases', () => {
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [380, 380],
+          canvasDimensions: [1_024, 768],
+          previousPosition: [432, 304],
+        }),
+      ).toEqual([456, 328])
+    })
+
+    it('supports an explicit cascade offset', () => {
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [160, 160],
+          canvasDimensions: [600, 400],
+          previousPosition: [220, 120],
+          cascadeOffset: 10,
+        }),
+      ).toEqual([230, 130])
+    })
+
+    it('clamps a cascaded note at the canvas boundaries', () => {
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [380, 380],
+          canvasDimensions: [400, 400],
+          previousPosition: [100, 100],
+        }),
+      ).toEqual([20, 20])
+    })
+
+    it('anchors an oversized note to the canvas origin', () => {
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [700, 500],
+          canvasDimensions: [600, 400],
+          previousPosition: [100, 100],
+        }),
+      ).toEqual([0, 0])
+    })
+
+    it('rejects invalid cascade inputs', () => {
+      expect(() =>
+        calculateNoteCreationPosition({
+          noteDimensions: [160, 160],
+          canvasDimensions: [600, 400],
+          previousPosition: [Number.NaN, 0],
+        }),
+      ).toThrow(RangeError)
+
+      expect(() =>
+        calculateNoteCreationPosition({
+          noteDimensions: [160, 160],
+          canvasDimensions: [600, 400],
+          cascadeOffset: Number.NaN,
+        }),
+      ).toThrow(RangeError)
     })
   })
 

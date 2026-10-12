@@ -9,6 +9,8 @@
   --note-controls-swatch-shadow-color: rgb(34 42 52 / 8%);
   --note-controls-selection-ring-color: #303a45;
   --note-controls-focus-ring-color: rgb(54 105 245 / 42%);
+  --note-controls-add-hover-color: #303a45;
+  --note-controls-add-shadow-color: rgb(32 40 50 / 22%);
 
   display: flex;
   align-items: center;
@@ -137,8 +139,37 @@
     0 0 0 4px var(--note-controls-selection-ring-color);
 }
 
+.note-controls__add {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--color-text-strong);
+  box-shadow: 0 5px 12px var(--note-controls-add-shadow-color);
+  color: var(--color-surface-raised);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.note-controls__add:hover {
+  background: var(--note-controls-add-hover-color);
+}
+
+.note-controls__add-icon {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+}
+
 .note-controls__size:focus-visible,
-.note-controls__color:focus-visible {
+.note-controls__color:focus-visible,
+.note-controls__add:focus-visible {
   outline: 3px solid var(--note-controls-focus-ring-color);
   outline-offset: 2px;
 }

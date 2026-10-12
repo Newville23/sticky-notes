@@ -4,7 +4,7 @@ import { NoteControls } from './NoteControls'
 
 describe('NoteControls', () => {
   it('renders the selected size and background', () => {
-    render(<NoteControls onConfigurationChange={vi.fn()} />)
+    render(<NoteControls onConfigurationChange={vi.fn()} onAddNote={vi.fn()} />)
 
     expect(screen.getByRole('button', { name: 'S note size' })).toHaveAttribute(
       'aria-pressed',
@@ -13,18 +13,26 @@ describe('NoteControls', () => {
     expect(
       screen.getByRole('button', { name: 'yellow note background' }),
     ).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Add note' })).toBeInTheDocument()
   })
 
   it('keeps selection state local and reports the complete configuration', async () => {
     const user = userEvent.setup()
     const onConfigurationChange = vi.fn()
+    const onAddNote = vi.fn()
 
-    render(<NoteControls onConfigurationChange={onConfigurationChange} />)
+    render(
+      <NoteControls
+        onConfigurationChange={onConfigurationChange}
+        onAddNote={onAddNote}
+      />,
+    )
 
     await user.click(screen.getByRole('button', { name: 'XL note size' }))
     await user.click(
       screen.getByRole('button', { name: 'red note background' }),
     )
+    await user.click(screen.getByRole('button', { name: 'Add note' }))
 
     expect(onConfigurationChange).toHaveBeenNthCalledWith(1, {
       size: 'XL',
@@ -40,5 +48,6 @@ describe('NoteControls', () => {
     expect(
       screen.getByRole('button', { name: 'red note background' }),
     ).toHaveAttribute('aria-pressed', 'true')
+    expect(onAddNote).toHaveBeenCalledOnce()
   })
 })

@@ -7,19 +7,19 @@ The application must prioritize, simplicity, predictability, small bundle size a
 
 ## Scope
 The application must support:
-- creating a note at a time inside the canvas.
+- creating one note at a time from an explicit toolbar action.
 - selecting a note size from S, M, L or XL.
 - selecting a note color background from yellow, green and red.
-- default node configuration: S size and yellow background.
+- default note configuration: S size and yellow background.
+- entering and editing note content.
 - editing note color and size.
 - moving notes through drag interactions.
 - resizing notes through drag interactions.
 - deleting notes by dragging them into a visible delete zone.
 - undoing a deletion for up to 5 seconds.
 
-Out of scoope:
+Out of scope:
 - persistence between sessions with local storage.
-- entering/editing note text.
 - multi selection.
 - undo/redo history.
 - zooming or panning.
@@ -140,6 +140,11 @@ For this application performance is high priority requirement. To remain it duri
 ```
 And only when the interaction is complete the application commit changes to global state. Finally the rendering should be scoped so updating one note does not rerender unrelated notes.
 
+Note content entry must remain local to the active note while the user is typing.
+Typing must not write to Zustand on every keystroke. The final content is
+committed when the editor loses focus, and that commit must not rerender
+unrelated notes.
+
 ## Deletion and undo
 Dropping a note inside the delete zone removes it immediately from visible state.
 
@@ -162,7 +167,8 @@ The application targets desktop browsers only. The minimum supported viewport is
 ## Definition of Done
 The application is complete when all feature specifications pass their acceptance criteria and the following conditions are met:
 
-- users can create, edit, move, resize, delete, and restore notes.
+- users can create notes from the toolbar and immediately enter content.
+- users can edit, move, resize, delete, and restore notes.
 - notes cannot leave the canvas or become inaccessible.
 - drag interactions do not trigger global state writes until the interaction is complete.
 - updating one note does not rerender unrelated notes.
@@ -175,5 +181,8 @@ Unit test geometry utilities, including clamping, resizing, boundary calculation
 
 Verify that pointer movement does not write to React or Zustand state until interaction completion. Verify that updating one note does not rerender unrelated notes.
 
-Run a small browser smoke-test suite in the supported Chrome and Firefox versions at the minimum viewport size.
+Verify that the toolbar creation action uses the active configuration, focuses
+the new note editor, and commits content when editing finishes without writing
+to Zustand on every keystroke.
 
+Run a small browser smoke-test suite in the supported Chrome and Firefox versions at the minimum viewport size.

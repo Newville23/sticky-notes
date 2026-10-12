@@ -1,4 +1,9 @@
-import { MIN_NOTE_SIZE, type Dimensions, type Point } from '../../domain'
+import {
+  MIN_NOTE_SIZE,
+  NOTE_CREATION_CASCADE_OFFSET,
+  type Dimensions,
+  type Point,
+} from '../../domain'
 
 export interface ResizeConstraints {
   readonly minimum: Dimensions
@@ -20,6 +25,13 @@ export interface CalculateResizeDimensionsParams {
   readonly notePosition: Point
   readonly canvasDimensions: Dimensions
   readonly minimumDimensions?: Dimensions
+}
+
+export interface CalculateNoteCreationPositionParams {
+  readonly noteDimensions: Dimensions
+  readonly canvasDimensions: Dimensions
+  readonly previousPosition?: Point
+  readonly cascadeOffset?: number
 }
 
 export function isFinitePoint(value: unknown): value is Point {
@@ -74,6 +86,36 @@ export function clampPosition(
   const maximumY = Math.max(0, canvasHeight - noteHeight)
 
   return [clamp(x, 0, maximumX), clamp(y, 0, maximumY)]
+}
+
+export function calculateNoteCreationPosition({
+  noteDimensions,
+  canvasDimensions,
+  previousPosition,
+  cascadeOffset = NOTE_CREATION_CASCADE_OFFSET,
+}: CalculateNoteCreationPositionParams): Point {
+  assertDimensions(noteDimensions, 'Note dimensions')
+  assertDimensions(canvasDimensions, 'Canvas dimensions')
+
+  if (previousPosition) {
+    assertPoint(previousPosition, 'Previous position')
+  }
+
+  if (!Number.isFinite(cascadeOffset) || cascadeOffset < 0) {
+    throw new RangeError('Cascade offset must be a finite, non-negative number')
+  }
+
+  const [noteWidth, noteHeight] = noteDimensions
+  const [canvasWidth, canvasHeight] = canvasDimensions
+  const centeredPosition: Point = [
+    (canvasWidth - noteWidth) / 2,
+    (canvasHeight - noteHeight) / 2,
+  ]
+  const position: Point = previousPosition
+    ? [previousPosition[0] + cascadeOffset, previousPosition[1] + cascadeOffset]
+    : centeredPosition
+
+  return clampPosition(position, noteDimensions, canvasDimensions)
 }
 
 export function calculateDragPosition({
