@@ -124,8 +124,9 @@ src/
 │   └── notes/
 │       ├── geometry.ts
 │       ├── noteStore.ts
-│       ├── useDrag.ts
-│       ├── useResize.ts
+│       ├── hooks/
+│       │   ├── useDrag.ts
+│       │   └── useResize.ts
 │       ├── Note.tsx
 │       └── NoteCanvas.tsx
 ├── components/

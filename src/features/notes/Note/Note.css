@@ -4,6 +4,7 @@
   --note-inset-color: rgb(83 65 16 / 8%);
   --note-text-color: #3e3828;
   --note-placeholder-color: rgb(62 56 40 / 52%);
+  --note-drag-indicator-color: rgb(62 56 40 / 28%);
 
   position: absolute;
   z-index: 1;
@@ -20,11 +21,32 @@
   transform: translate3d(var(--note-x), var(--note-y), 0);
 }
 
+.note__drag-surface {
+  display: grid;
+  height: 28px;
+  cursor: grab;
+  place-items: center;
+  touch-action: none;
+  user-select: none;
+}
+
+.note__drag-surface::before {
+  content: '';
+  width: 30px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--note-drag-indicator-color);
+}
+
+.note__drag-surface:active {
+  cursor: grabbing;
+}
+
 .note__editor {
   display: block;
   width: 100%;
-  height: 100%;
-  padding: 18px 18px 28px;
+  height: calc(100% - 28px);
+  padding: 4px 18px 28px;
   border: 0;
   outline: 0;
   background: transparent;

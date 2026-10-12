@@ -31,10 +31,13 @@
 
 ## 4. Note Movement
 
-- Implement pointer capture and drag session refs.
+- Start dragging only from the draggable note surface; pointer activity inside the content editor must not initiate a drag.
+- Implement pointer capture and cache the initial pointer position, note position, note bounds, and canvas bounds in drag session refs.
 - Mutate `transform` directly during movement.
-- Commit the final position on `pointerup`.
-- Handle rollback on `pointercancel`.
+- Keep React state and Zustand unchanged during `pointermove`.
+- Clamp movement so the complete note remains inside the canvas.
+- Commit the final position exactly once on `pointerup` and release pointer capture.
+- Handle rollback, pointer-capture release, and interaction cleanup on `pointercancel`.
 
 ## 5. Note Resize
 
@@ -52,7 +55,12 @@
 
 ## 7. Validation
 
-- Add unit tests for geometry and store behavior.
-- Add interaction tests for create, drag, resize, delete, undo, and cancellation.
-- Verify narrow rerenders and no state writes during `pointermove`.
-- Run smoke tests in supported Chrome and Firefox environments.
+- Add unit tests for geometry, creation placement and cascading, store behavior, resize constraints, deletion snapshots, and undo timing.
+- Verify toolbar creation with the active configuration, centered and clamped placement, mixed-size cascading, and no creation from empty-canvas clicks.
+- Verify that newly created note editors receive focus and that editor pointer activity does not initiate dragging.
+- Verify plain-text content validation, the 2,000-character limit, null-character rejection, and literal rendering of HTML-like content without `innerHTML` or `dangerouslySetInnerHTML`.
+- Verify that typing causes zero Zustand writes and that blur commits valid content exactly once without rerendering unrelated notes.
+- Add interaction tests for pointer capture, drag, resize, delete, undo, and `pointercancel` rollback and cleanup.
+- Verify zero React state updates, zero Zustand writes, and no repeated layout measurements during `pointermove`.
+- Verify a single global-state commit on interaction completion and narrow rerenders so updating one note does not rerender unrelated notes.
+- Run smoke tests in the latest stable Chrome and Firefox at the minimum supported viewport of `1024 × 768`.

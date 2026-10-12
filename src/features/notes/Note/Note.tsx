@@ -1,11 +1,19 @@
-import { memo, type CSSProperties, type FocusEvent } from 'react'
+import {
+  memo,
+  useCallback,
+  useRef,
+  type CSSProperties,
+  type FocusEvent,
+} from 'react'
 import {
   MAX_NOTE_CONTENT_LENGTH,
   isValidNoteContent,
   type NoteBackground,
   type NoteId,
+  type Point,
 } from '../../../domain'
 import { useNoteStore } from '../noteStore'
+import { useDrag } from '../hooks/useDrag'
 import './Note.css'
 
 export interface NoteProps {
@@ -24,8 +32,26 @@ function getBackgroundClass(background: NoteBackground): string {
 }
 
 export const Note = memo(function Note({ id }: NoteProps) {
+  const noteRef = useRef<HTMLElement>(null)
   const note = useNoteStore((state) => state.notesById[id])
   const updateNote = useNoteStore((state) => state.updateNote)
+  const commitPosition = useCallback(
+    (position: Point) => {
+      updateNote(id, { position })
+    },
+    [id, updateNote],
+  )
+  const {
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    handlePointerCancel,
+    handleLostPointerCapture,
+  } = useDrag({
+    noteRef,
+    initialNotePosition: note?.position ?? [0, 0],
+    onDragEnd: commitPosition,
+  })
 
   if (!note) {
     return null
@@ -54,11 +80,22 @@ export const Note = memo(function Note({ id }: NoteProps) {
 
   return (
     <article
+      ref={noteRef}
       className={`note ${getBackgroundClass(note.background)}`}
       style={style}
       aria-label="Sticky note"
       data-note-id={id}
     >
+      <div
+        className="note__drag-surface"
+        data-note-drag-surface=""
+        aria-hidden="true"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        onLostPointerCapture={handleLostPointerCapture}
+      />
       <textarea
         className="note__editor"
         aria-label="Note content"
