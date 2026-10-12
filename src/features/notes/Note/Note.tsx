@@ -8,12 +8,14 @@ import {
 import {
   MAX_NOTE_CONTENT_LENGTH,
   isValidNoteContent,
+  type Dimensions,
   type NoteBackground,
   type NoteId,
   type Point,
 } from '../../../domain'
 import { useNoteStore } from '../noteStore'
 import { useDrag } from '../hooks/useDrag'
+import { useResize } from '../hooks/useResize'
 import './Note.css'
 
 export interface NoteProps {
@@ -41,16 +43,34 @@ export const Note = memo(function Note({ id }: NoteProps) {
     },
     [id, updateNote],
   )
+  const commitDimensions = useCallback(
+    (dimensions: Dimensions) => {
+      updateNote(id, { dimensions })
+    },
+    [id, updateNote],
+  )
   const {
-    handlePointerDown,
-    handlePointerMove,
-    handlePointerUp,
-    handlePointerCancel,
-    handleLostPointerCapture,
+    handlePointerDown: handleDragPointerDown,
+    handlePointerMove: handleDragPointerMove,
+    handlePointerUp: handleDragPointerUp,
+    handlePointerCancel: handleDragPointerCancel,
+    handleLostPointerCapture: handleDragLostPointerCapture,
   } = useDrag({
     noteRef,
     initialNotePosition: note?.position ?? [0, 0],
     onDragEnd: commitPosition,
+  })
+  const {
+    handlePointerDown: handleResizePointerDown,
+    handlePointerMove: handleResizePointerMove,
+    handlePointerUp: handleResizePointerUp,
+    handlePointerCancel: handleResizePointerCancel,
+    handleLostPointerCapture: handleResizeLostPointerCapture,
+  } = useResize({
+    noteRef,
+    initialDimensions: note?.dimensions ?? [0, 0],
+    notePosition: note?.position ?? [0, 0],
+    onResizeEnd: commitDimensions,
   })
 
   if (!note) {
@@ -90,11 +110,11 @@ export const Note = memo(function Note({ id }: NoteProps) {
         className="note__drag-surface"
         data-note-drag-surface=""
         aria-hidden="true"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
-        onLostPointerCapture={handleLostPointerCapture}
+        onPointerDown={handleDragPointerDown}
+        onPointerMove={handleDragPointerMove}
+        onPointerUp={handleDragPointerUp}
+        onPointerCancel={handleDragPointerCancel}
+        onLostPointerCapture={handleDragLostPointerCapture}
       />
       <textarea
         className="note__editor"
@@ -105,6 +125,16 @@ export const Note = memo(function Note({ id }: NoteProps) {
         autoFocus
         onBlur={commitContent}
         onPointerDown={(event) => event.stopPropagation()}
+      />
+      <div
+        className="note__resize-handle"
+        data-note-resize-handle=""
+        aria-hidden="true"
+        onPointerDown={handleResizePointerDown}
+        onPointerMove={handleResizePointerMove}
+        onPointerUp={handleResizePointerUp}
+        onPointerCancel={handleResizePointerCancel}
+        onLostPointerCapture={handleResizeLostPointerCapture}
       />
     </article>
   )

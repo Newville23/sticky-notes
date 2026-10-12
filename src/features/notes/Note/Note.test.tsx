@@ -309,4 +309,119 @@ describe('Note', () => {
 
     unsubscribe()
   })
+
+  it('resizes through the DOM and commits dimensions once on pointer release', () => {
+    const { container } = render(
+      <section className="note-canvas">
+        <Note id={noteId} />
+      </section>,
+    )
+    const canvas = container.querySelector<HTMLElement>('.note-canvas')
+    const note = screen.getByRole('article', { name: 'Sticky note' })
+    const resizeHandle = container.querySelector<HTMLElement>(
+      '[data-note-resize-handle]',
+    )
+
+    if (!canvas || !resizeHandle) {
+      throw new Error('Expected canvas and resize handle elements')
+    }
+
+    resizeHandle.setPointerCapture = vi.fn()
+    resizeHandle.releasePointerCapture = vi.fn()
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({
+      x: 0,
+      y: 0,
+      top: 0,
+      right: 600,
+      bottom: 400,
+      left: 0,
+      width: 600,
+      height: 400,
+      toJSON: () => ({}),
+    })
+
+    const beforeMove = useNoteStore.getState()
+    const onStoreChange = vi.fn()
+    const unsubscribe = useNoteStore.subscribe(onStoreChange)
+
+    fireEvent.pointerDown(resizeHandle, {
+      button: 0,
+      pointerId: 9,
+      clientX: 260,
+      clientY: 260,
+    })
+    fireEvent.pointerMove(resizeHandle, {
+      pointerId: 9,
+      clientX: 320,
+      clientY: 300,
+    })
+
+    expect(note.style.width).toBe('220px')
+    expect(note.style.height).toBe('200px')
+    expect(useNoteStore.getState()).toBe(beforeMove)
+    expect(onStoreChange).not.toHaveBeenCalled()
+
+    fireEvent.pointerUp(resizeHandle, { pointerId: 9 })
+
+    expect(useNoteStore.getState().notesById[noteId].dimensions).toEqual([
+      220, 200,
+    ])
+    expect(onStoreChange).toHaveBeenCalledOnce()
+    expect(note.style.width).toBe('')
+    expect(note.style.height).toBe('')
+    expect(resizeHandle.releasePointerCapture).toHaveBeenCalledWith(9)
+
+    unsubscribe()
+  })
+
+  it('restores persisted dimensions when resizing is cancelled', () => {
+    const { container } = render(
+      <section className="note-canvas">
+        <Note id={noteId} />
+      </section>,
+    )
+    const canvas = container.querySelector<HTMLElement>('.note-canvas')
+    const note = screen.getByRole('article', { name: 'Sticky note' })
+    const resizeHandle = container.querySelector<HTMLElement>(
+      '[data-note-resize-handle]',
+    )
+
+    if (!canvas || !resizeHandle) {
+      throw new Error('Expected canvas and resize handle elements')
+    }
+
+    resizeHandle.setPointerCapture = vi.fn()
+    resizeHandle.releasePointerCapture = vi.fn()
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({
+      x: 0,
+      y: 0,
+      top: 0,
+      right: 600,
+      bottom: 400,
+      left: 0,
+      width: 600,
+      height: 400,
+      toJSON: () => ({}),
+    })
+
+    const beforeResize = useNoteStore.getState()
+
+    fireEvent.pointerDown(resizeHandle, {
+      button: 0,
+      pointerId: 9,
+      clientX: 260,
+      clientY: 260,
+    })
+    fireEvent.pointerMove(resizeHandle, {
+      pointerId: 9,
+      clientX: 320,
+      clientY: 300,
+    })
+    fireEvent.pointerCancel(resizeHandle, { pointerId: 9 })
+
+    expect(useNoteStore.getState()).toBe(beforeResize)
+    expect(note.style.width).toBe('')
+    expect(note.style.height).toBe('')
+    expect(resizeHandle.releasePointerCapture).toHaveBeenCalledWith(9)
+  })
 })
