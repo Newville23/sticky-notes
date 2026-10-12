@@ -1,5 +1,11 @@
 import { create } from 'zustand'
-import { createNoteId, type Note, type NoteId } from '../../domain'
+import {
+  assertValidNoteContent,
+  createNoteId,
+  isValidNoteContent,
+  type Note,
+  type NoteId,
+} from '../../domain'
 
 export type CreateNoteInput = Omit<Note, 'id'>
 export type NoteChanges = Partial<Omit<Note, 'id'>>
@@ -32,6 +38,8 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
   ...initialNoteState,
 
   createNote: (input) => {
+    assertValidNoteContent(input.content)
+
     let id = createNoteId()
 
     while (get().notesById[id]) {
@@ -55,7 +63,10 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     set((state) => {
       const note = state.notesById[id]
 
-      if (!note) {
+      if (
+        !note ||
+        ('content' in changes && !isValidNoteContent(changes.content))
+      ) {
         return state
       }
 

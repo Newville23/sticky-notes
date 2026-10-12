@@ -23,6 +23,9 @@ Ensure note interactions remain responsive, predictable, and testable under the 
 - `pointercancel` must safely rollback the active interaction.
 - Pointer capture and temporary interaction state must be cleaned up after completion, cancellation, or failure.
 - Invalid operations must fail safely without corrupting application state.
+- Note content must be validated as a plain-text string no longer than 2,000 characters.
+- Note content containing null characters must be rejected without replacing the last valid value.
+- Note content must never be rendered with `innerHTML` or `dangerouslySetInnerHTML`.
 - Unrecoverable rendering errors must be handled by an application-level error boundary.
 
 ## Testing
@@ -35,6 +38,9 @@ Unit tests must cover:
 - Deterministic creation placement and boundary clamping.
 - Immediate focus of a newly created note editor.
 - Local content entry and a single persisted commit when editing finishes.
+- Maximum content length enforcement at 2,000 characters.
+- Rejection of non-string content and content containing null characters.
+- Literal rendering of content that resembles HTML.
 - Minimum and maximum resize constraints.
 - Delete recovery timing and exact snapshot restoration.
 
@@ -48,6 +54,8 @@ Interaction tests must verify:
 - Unrelated notes do not rerender when another note changes.
 - Empty canvas clicks do not create notes.
 - Content keystrokes do not write to Zustand and blur commits once.
+- Content at the maximum length cannot accept additional characters.
+- Invalid content does not replace the last valid persisted value.
 - Pointer activity inside the content editor does not start note dragging.
 
 Manual browser smoke tests must run on the latest supported Chrome and Firefox versions at a minimum viewport of `1024 × 768`.
@@ -69,6 +77,14 @@ Manual browser smoke tests must run on the latest supported Chrome and Firefox v
 **Given** an active note editor  
 **When** the user types and then moves focus away  
 **Then** typing causes no Zustand writes and the final content is committed once on blur.
+
+**Given** invalid note content  
+**When** it reaches the domain or store boundary  
+**Then** it is rejected without corrupting or replacing the last valid note content.
+
+**Given** note content that resembles executable markup  
+**When** it is displayed  
+**Then** it is rendered as literal plain text without an HTML-rendering API.
 
 **Given** invalid geometry or an interrupted interaction  
 **When** the operation cannot complete normally  

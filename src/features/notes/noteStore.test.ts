@@ -1,4 +1,4 @@
-import type { Note } from '../../domain'
+import { MAX_NOTE_CONTENT_LENGTH, type Note } from '../../domain'
 import { useNoteStore, type CreateNoteInput } from './noteStore'
 
 const firstNoteInput: CreateNoteInput = {
@@ -70,6 +70,40 @@ describe('noteStore', () => {
     updateNote(id, { background: 'yellow' })
 
     expect(useNoteStore.getState()).toBe(beforeUpdate)
+  })
+
+  it('rejects invalid content updates without replacing persisted content', () => {
+    const { createNote, updateNote } = useNoteStore.getState()
+    const id = createNote({ ...firstNoteInput, content: 'Persisted content' })
+    const beforeUpdate = useNoteStore.getState()
+
+    updateNote(id, { content: 'invalid\0content' })
+    updateNote(id, { content: 'a'.repeat(MAX_NOTE_CONTENT_LENGTH + 1) })
+
+    expect(useNoteStore.getState()).toBe(beforeUpdate)
+    expect(useNoteStore.getState().notesById[id].content).toBe(
+      'Persisted content',
+    )
+  })
+
+  it('rejects invalid content before creating a note', () => {
+    const { createNote } = useNoteStore.getState()
+    const nonStringContent = {
+      ...firstNoteInput,
+      content: 42,
+    } as unknown as CreateNoteInput
+
+    expect(() => createNote(nonStringContent)).toThrow(TypeError)
+    expect(() =>
+      createNote({ ...firstNoteInput, content: 'invalid\0content' }),
+    ).toThrow(RangeError)
+    expect(() =>
+      createNote({
+        ...firstNoteInput,
+        content: 'a'.repeat(MAX_NOTE_CONTENT_LENGTH + 1),
+      }),
+    ).toThrow(RangeError)
+    expect(useNoteStore.getState().noteIds).toHaveLength(0)
   })
 
   it('deletes a note and restores its exact snapshot and ordering', () => {

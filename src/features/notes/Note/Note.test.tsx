@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { NoteId } from '../../../domain'
+import { MAX_NOTE_CONTENT_LENGTH, type NoteId } from '../../../domain'
 import { useNoteStore } from '../noteStore'
 import { Note } from './Note'
 
@@ -21,6 +21,36 @@ describe('Note', () => {
     render(<Note id={noteId} />)
 
     expect(screen.getByRole('textbox', { name: 'Note content' })).toHaveFocus()
+    expect(
+      screen.getByRole('textbox', { name: 'Note content' }),
+    ).toHaveAttribute('maxlength', String(MAX_NOTE_CONTENT_LENGTH))
+  })
+
+  it('rejects null characters and restores the persisted content on blur', () => {
+    useNoteStore.getState().updateNote(noteId, { content: 'Safe content' })
+
+    render(<Note id={noteId} />)
+    const editor = screen.getByRole('textbox', { name: 'Note content' })
+
+    fireEvent.change(editor, { target: { value: 'unsafe\0content' } })
+    fireEvent.blur(editor)
+
+    expect(editor).toHaveValue('Safe content')
+    expect(useNoteStore.getState().notesById[noteId].content).toBe(
+      'Safe content',
+    )
+  })
+
+  it('renders HTML-like content as a literal textarea value', () => {
+    const content = '<img src=x onerror=alert(1)>'
+    useNoteStore.getState().updateNote(noteId, { content })
+
+    const { container } = render(<Note id={noteId} />)
+
+    expect(screen.getByRole('textbox', { name: 'Note content' })).toHaveValue(
+      content,
+    )
+    expect(container.querySelector('img')).not.toBeInTheDocument()
   })
 
   it('keeps typing local and commits content once on blur', async () => {

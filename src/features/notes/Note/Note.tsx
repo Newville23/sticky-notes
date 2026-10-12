@@ -1,5 +1,10 @@
 import { memo, type CSSProperties, type FocusEvent } from 'react'
-import type { NoteBackground, NoteId } from '../../../domain'
+import {
+  MAX_NOTE_CONTENT_LENGTH,
+  isValidNoteContent,
+  type NoteBackground,
+  type NoteId,
+} from '../../../domain'
 import { useNoteStore } from '../noteStore'
 import './Note.css'
 
@@ -37,6 +42,11 @@ export const Note = memo(function Note({ id }: NoteProps) {
   const commitContent = (event: FocusEvent<HTMLTextAreaElement>) => {
     const content = event.currentTarget.value
 
+    if (!isValidNoteContent(content)) {
+      event.currentTarget.value = note.content
+      return
+    }
+
     if (content !== note.content) {
       updateNote(id, { content })
     }
@@ -53,6 +63,7 @@ export const Note = memo(function Note({ id }: NoteProps) {
         className="note__editor"
         aria-label="Note content"
         defaultValue={note.content}
+        maxLength={MAX_NOTE_CONTENT_LENGTH}
         placeholder="Write something…"
         autoFocus
         onBlur={commitContent}

@@ -52,6 +52,11 @@ interface Note {
 ```
 In the system Coordinates and diemensions must always contain valid numeric values. Values like `null` and `undefined` must not represent valid geometry.
 
+Note content must be a plain-text string with a maximum length of 2,000
+characters. Null characters are invalid. Content that resembles HTML must remain
+literal text and must never be interpreted or rendered through `innerHTML` or
+`dangerouslySetInnerHTML`.
+
 ## State Model
 The application must use a persisted state described by the following interface:
 

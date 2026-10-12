@@ -18,6 +18,7 @@ export type NoteBackground = (typeof NOTE_BACKGROUNDS)[number]
 export const DEFAULT_NOTE_SIZE_PRESET: NoteSizePreset = 'S'
 export const DEFAULT_NOTE_BACKGROUND: NoteBackground = 'yellow'
 export const DEFAULT_NOTE_CONTENT = ''
+export const MAX_NOTE_CONTENT_LENGTH = 2_000
 export const NOTE_CREATION_CASCADE_OFFSET = 24
 
 export const DELETE_UNDO_WINDOW_MS = 5_000

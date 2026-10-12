@@ -2,10 +2,12 @@ import {
   DEFAULT_NOTE_BACKGROUND,
   DEFAULT_NOTE_SIZE_PRESET,
   DELETE_UNDO_WINDOW_MS,
+  MAX_NOTE_CONTENT_LENGTH,
   MIN_NOTE_SIZE,
   NOTE_BACKGROUNDS,
   NOTE_SIZE_PRESETS,
   createNoteId,
+  isValidNoteContent,
 } from '.'
 
 describe('note domain', () => {
@@ -25,6 +27,17 @@ describe('note domain', () => {
 
   it('defines a five-second delete recovery window', () => {
     expect(DELETE_UNDO_WINDOW_MS).toBe(5_000)
+  })
+
+  it('accepts bounded plain text and rejects invalid note content', () => {
+    expect(isValidNoteContent('')).toBe(true)
+    expect(isValidNoteContent('a'.repeat(MAX_NOTE_CONTENT_LENGTH))).toBe(true)
+    expect(isValidNoteContent('<strong>literal text</strong>')).toBe(true)
+    expect(isValidNoteContent('a'.repeat(MAX_NOTE_CONTENT_LENGTH + 1))).toBe(
+      false,
+    )
+    expect(isValidNoteContent('invalid\0content')).toBe(false)
+    expect(isValidNoteContent(null)).toBe(false)
   })
 
   it('creates unique UUID note identifiers', () => {

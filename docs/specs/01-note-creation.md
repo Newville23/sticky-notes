@@ -19,6 +19,10 @@ configuration and immediately enter its content.
 - the new note must be added to both `notesById` and `noteIds`.
 - each note provides a text editor for its content.
 - the newly created note editor receives focus immediately after mounting.
+- note content must be a plain-text string with a maximum length of 2,000 characters.
+- the editor must enforce the 2,000-character limit with its native `maxLength` constraint.
+- note content containing a null character is invalid and must not replace persisted content.
+- note content must be rendered only as a text or form-control value and must never use `innerHTML` or `dangerouslySetInnerHTML`.
 - content editing remains local to the note while typing.
 - note content is committed to Zustand when the editor loses focus, not on every keystroke.
 
@@ -51,6 +55,18 @@ configuration and immediately enter its content.
 **Given** edited note content  
 **When** the editor loses focus  
 **Then** the final content is committed once to that note without rerendering unrelated notes.
+
+**Given** a user is entering note content  
+**When** the content reaches 2,000 characters  
+**Then** the editor prevents additional characters without writing intermediate content to Zustand.
+
+**Given** note content containing a null character  
+**When** an update reaches the content-validation boundary  
+**Then** the invalid content is rejected and the last valid persisted content remains unchanged.
+
+**Given** note content that resembles HTML  
+**When** the note is rendered  
+**Then** the content remains literal plain text and is never interpreted as markup.
 
 **Given** any canvas state  
 **When** the user clicks an empty canvas position  
