@@ -1,4 +1,4 @@
-import { memo, type CSSProperties } from 'react'
+import { memo, type CSSProperties, type FocusEvent } from 'react'
 import type { NoteBackground, NoteId } from '../../../domain'
 import { useNoteStore } from '../noteStore'
 import './Note.css'
@@ -20,6 +20,7 @@ function getBackgroundClass(background: NoteBackground): string {
 
 export const Note = memo(function Note({ id }: NoteProps) {
   const note = useNoteStore((state) => state.notesById[id])
+  const updateNote = useNoteStore((state) => state.updateNote)
 
   if (!note) {
     return null
@@ -33,6 +34,13 @@ export const Note = memo(function Note({ id }: NoteProps) {
     '--note-width': `${width}px`,
     '--note-height': `${height}px`,
   }
+  const commitContent = (event: FocusEvent<HTMLTextAreaElement>) => {
+    const content = event.currentTarget.value
+
+    if (content !== note.content) {
+      updateNote(id, { content })
+    }
+  }
 
   return (
     <article
@@ -40,6 +48,16 @@ export const Note = memo(function Note({ id }: NoteProps) {
       style={style}
       aria-label="Sticky note"
       data-note-id={id}
-    />
+    >
+      <textarea
+        className="note__editor"
+        aria-label="Note content"
+        defaultValue={note.content}
+        placeholder="Write something…"
+        autoFocus
+        onBlur={commitContent}
+        onPointerDown={(event) => event.stopPropagation()}
+      />
+    </article>
   )
 })

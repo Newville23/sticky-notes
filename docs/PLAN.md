@@ -27,7 +27,7 @@
 
 - Build canvas and toolbar components.
 - Support default `S` / yellow configuration.
-- Create notes at pointer position and clamp them inside the canvas.
+- Create notes with `Add Note` btn and clamp them inside the canvas.
 
 ## 4. Note Movement
 

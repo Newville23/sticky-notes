@@ -2,6 +2,8 @@
   --note-border-color: rgb(32 40 50 / 10%);
   --note-shadow-color: rgb(36 43 50 / 16%);
   --note-inset-color: rgb(83 65 16 / 8%);
+  --note-text-color: #3e3828;
+  --note-placeholder-color: rgb(62 56 40 / 52%);
 
   position: absolute;
   z-index: 1;
@@ -11,10 +13,30 @@
   height: var(--note-height);
   border: 1px solid var(--note-border-color);
   border-radius: 5px 5px 12px;
+  overflow: hidden;
   box-shadow:
     inset -12px -12px 0 var(--note-inset-color),
     0 12px 24px var(--note-shadow-color);
   transform: translate3d(var(--note-x), var(--note-y), 0);
+}
+
+.note__editor {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 18px 18px 28px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--note-text-color);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  resize: none;
+}
+
+.note__editor::placeholder {
+  color: var(--note-placeholder-color);
 }
 
 .note--yellow {

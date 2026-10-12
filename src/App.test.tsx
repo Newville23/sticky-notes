@@ -62,6 +62,7 @@ describe('App', () => {
     expect(firstNote.dimensions).toEqual([300, 300])
     expect(firstNote.background).toBe('green')
     expect(firstNote.position).toEqual([150, 50])
+    expect(screen.getByRole('textbox', { name: 'Note content' })).toHaveFocus()
 
     await user.click(screen.getByRole('button', { name: 'Add note' }))
 
@@ -73,6 +74,9 @@ describe('App', () => {
     expect(secondNote.dimensions).toEqual([300, 300])
     expect(secondNote.background).toBe('green')
     expect(secondNote.position).toEqual([174, 74])
+    expect(
+      screen.getAllByRole('textbox', { name: 'Note content' })[1],
+    ).toHaveFocus()
   })
 
   it('continues the cascade when the selected note size increases', async () => {
