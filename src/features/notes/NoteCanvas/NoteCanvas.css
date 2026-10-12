@@ -1,0 +1,90 @@
+.note-canvas {
+  --note-canvas-dot-color: rgb(116 124 132 / 80%);
+  --note-canvas-highlight-color: rgb(255 255 255 / 72%);
+  --note-canvas-tint-color: rgb(227 232 220 / 58%);
+  --note-canvas-panel-border-color: rgb(34 42 52 / 8%);
+  --note-canvas-panel-color: rgb(255 255 255 / 68%);
+  --note-canvas-panel-shadow-color: rgb(42 48 54 / 8%);
+  --note-canvas-empty-text-color: #6a737c;
+  --note-canvas-empty-title-color: #28313a;
+  --note-canvas-note-inset-color: rgb(151 116 14 / 10%);
+  --note-canvas-note-shadow-color: rgb(137 109 24 / 14%);
+
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100svh;
+  overflow: hidden;
+  background-color: var(--color-surface-canvas);
+  background-image: radial-gradient(
+    circle,
+    var(--note-canvas-dot-color) 1px,
+    transparent 1.2px
+  );
+  background-position: 1px 1px;
+  background-size: 24px 24px;
+  isolation: isolate;
+}
+
+.note-canvas::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      var(--note-canvas-highlight-color),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 85% 90%,
+      var(--note-canvas-tint-color),
+      transparent 30%
+    );
+  pointer-events: none;
+}
+
+.note-canvas__empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(360px, calc(100% - 48px));
+  padding: 28px 32px;
+  border: 1px solid var(--note-canvas-panel-border-color);
+  border-radius: 20px;
+  background: var(--note-canvas-panel-color);
+  box-shadow: 0 18px 55px var(--note-canvas-panel-shadow-color);
+  color: var(--note-canvas-empty-text-color);
+  text-align: center;
+  transform: translate(-50%, -44%);
+  backdrop-filter: blur(7px);
+  pointer-events: none;
+}
+
+.note-canvas__empty-mark {
+  display: block;
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 16px;
+  border-radius: 10px 10px 14px;
+  background: var(--color-note-yellow);
+  box-shadow:
+    inset -8px -8px 0 var(--note-canvas-note-inset-color),
+    0 9px 20px var(--note-canvas-note-shadow-color);
+  transform: rotate(-4deg);
+}
+
+.note-canvas__empty-title {
+  margin: 0;
+  color: var(--note-canvas-empty-title-color);
+  font-size: 18px;
+  font-weight: 720;
+  letter-spacing: -0.01em;
+}
+
+.note-canvas__empty-message {
+  margin: 7px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}

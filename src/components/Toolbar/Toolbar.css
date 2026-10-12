@@ -1,0 +1,29 @@
+.toolbar {
+  --toolbar-border-color: rgb(29 38 48 / 12%);
+  --toolbar-surface-color: rgb(255 255 255 / 88%);
+  --toolbar-shadow-color: rgb(24 32 42 / 12%);
+  --toolbar-shadow-soft-color: rgb(24 32 42 / 8%);
+
+  position: absolute;
+  z-index: 10;
+  top: 24px;
+  left: 50%;
+  box-sizing: border-box;
+  max-width: calc(100% - 48px);
+  padding: 10px 14px;
+  border: 1px solid var(--toolbar-border-color);
+  border-radius: 18px;
+  background: var(--toolbar-surface-color);
+  box-shadow:
+    0 18px 45px var(--toolbar-shadow-color),
+    0 3px 10px var(--toolbar-shadow-soft-color);
+  transform: translateX(-50%);
+  backdrop-filter: blur(16px);
+}
+
+@media (max-width: 760px) {
+  .toolbar {
+    top: 16px;
+    width: calc(100% - 32px);
+  }
+}
