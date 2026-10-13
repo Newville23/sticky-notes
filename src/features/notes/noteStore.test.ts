@@ -20,6 +20,7 @@ describe('noteStore', () => {
     useNoteStore.setState({
       notesById: {},
       noteIds: [],
+      undoBuffer: [],
     })
   })
 
@@ -117,6 +118,8 @@ describe('noteStore', () => {
     expect(snapshot).toEqual({ note: deletedNote, index: 0 })
     expect(useNoteStore.getState().notesById[firstId]).toBeUndefined()
     expect(useNoteStore.getState().noteIds).toEqual([secondId])
+    expect(useNoteStore.getState().undoBuffer).toHaveLength(1)
+    expect(useNoteStore.getState().undoBuffer[0].snapshot).toEqual(snapshot)
 
     if (!snapshot) {
       throw new Error('Expected the deleted note snapshot')
@@ -126,6 +129,31 @@ describe('noteStore', () => {
 
     expect(useNoteStore.getState().notesById[firstId]).toBe(deletedNote)
     expect(useNoteStore.getState().noteIds).toEqual([firstId, secondId])
+    expect(useNoteStore.getState().undoBuffer).toHaveLength(0)
+  })
+
+  it('keeps multiple deleted snapshots ordered and discards them independently', () => {
+    const { createNote, deleteNote, discardDeletedNote } =
+      useNoteStore.getState()
+    const firstId = createNote(firstNoteInput)
+    const secondId = createNote(secondNoteInput)
+
+    deleteNote(firstId)
+    deleteNote(secondId)
+
+    expect(
+      useNoteStore
+        .getState()
+        .undoBuffer.map(({ snapshot }) => snapshot.note.id),
+    ).toEqual([firstId, secondId])
+
+    discardDeletedNote(firstId)
+
+    expect(
+      useNoteStore
+        .getState()
+        .undoBuffer.map(({ snapshot }) => snapshot.note.id),
+    ).toEqual([secondId])
   })
 
   it('does not overwrite a note when restoring a duplicate ID', () => {

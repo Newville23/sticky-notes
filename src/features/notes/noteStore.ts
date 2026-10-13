@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import {
+  DELETE_UNDO_WINDOW_MS,
   assertValidNoteContent,
   createNoteId,
   isValidNoteContent,
@@ -15,9 +16,15 @@ export interface DeletedNoteSnapshot {
   readonly index: number
 }
 
+export interface UndoBufferEntry {
+  readonly snapshot: DeletedNoteSnapshot
+  readonly expiresAt: number
+}
+
 export interface NoteState {
   readonly notesById: Record<NoteId, Note>
   readonly noteIds: NoteId[]
+  readonly undoBuffer: UndoBufferEntry[]
 }
 
 export interface NoteActions {
@@ -25,6 +32,7 @@ export interface NoteActions {
   readonly updateNote: (id: NoteId, changes: NoteChanges) => void
   readonly deleteNote: (id: NoteId) => DeletedNoteSnapshot | undefined
   readonly restoreNote: (snapshot: DeletedNoteSnapshot) => void
+  readonly discardDeletedNote: (id: NoteId) => void
 }
 
 export type NoteStore = NoteState & NoteActions
@@ -32,6 +40,7 @@ export type NoteStore = NoteState & NoteActions
 const initialNoteState: NoteState = {
   notesById: {},
   noteIds: [],
+  undoBuffer: [],
 }
 
 export const useNoteStore = create<NoteStore>()((set, get) => ({
@@ -113,6 +122,13 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       return {
         notesById,
         noteIds: state.noteIds.filter((noteId) => noteId !== id),
+        undoBuffer: [
+          ...state.undoBuffer,
+          {
+            snapshot,
+            expiresAt: Date.now() + DELETE_UNDO_WINDOW_MS,
+          },
+        ],
       }
     })
 
@@ -135,7 +151,22 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
           [note.id]: note,
         },
         noteIds,
+        undoBuffer: state.undoBuffer.filter(
+          ({ snapshot }) => snapshot.note.id !== note.id,
+        ),
       }
+    })
+  },
+
+  discardDeletedNote: (id) => {
+    set((state) => {
+      const undoBuffer = state.undoBuffer.filter(
+        ({ snapshot }) => snapshot.note.id !== id,
+      )
+
+      return undoBuffer.length === state.undoBuffer.length
+        ? state
+        : { undoBuffer }
     })
   },
 }))

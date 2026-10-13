@@ -15,6 +15,10 @@ export interface UseDragParams {
   readonly noteRef: RefObject<HTMLElement | null>
   readonly initialNotePosition: Point
   readonly onDragEnd: (position: Point) => void
+  readonly onDragStart?: () => void
+  readonly onDragMove?: (pointerPosition: Point) => void
+  readonly onDrop?: (pointerPosition: Point) => boolean
+  readonly onDragCancel?: () => void
 }
 
 function toRect(bounds: DOMRect): Rect {
@@ -30,6 +34,10 @@ export function useDrag({
   noteRef,
   initialNotePosition,
   onDragEnd,
+  onDragStart,
+  onDragMove,
+  onDrop,
+  onDragCancel,
 }: UseDragParams) {
   const sessionRef = useRef<DragSession | null>(null)
 
@@ -64,9 +72,10 @@ export function useDrag({
         noteBounds: toRect(noteBounds),
         canvasBounds: toRect(canvasBounds),
       }
+      onDragStart?.()
       event.preventDefault()
     },
-    [initialNotePosition, noteRef],
+    [initialNotePosition, noteRef, onDragStart],
   )
 
   const handlePointerMove = useCallback(
@@ -91,8 +100,9 @@ export function useDrag({
 
       session.currentPosition = position
       noteElement.style.transform = `translate3d(${position[0]}px, ${position[1]}px, 0)`
+      onDragMove?.([event.clientX, event.clientY])
     },
-    [noteRef],
+    [noteRef, onDragMove],
   )
 
   const endDrag = useCallback(
@@ -109,12 +119,20 @@ export function useDrag({
       sessionRef.current = null
 
       try {
+        const dropHandled =
+          commit && onDrop?.([event.clientX, event.clientY]) === true
+
         if (
           commit &&
+          !dropHandled &&
           (finalPosition[0] !== session.initialNotePosition[0] ||
             finalPosition[1] !== session.initialNotePosition[1])
         ) {
           onDragEnd(finalPosition)
+        }
+
+        if (!commit) {
+          onDragCancel?.()
         }
       } finally {
         if (noteElement) {
@@ -126,7 +144,7 @@ export function useDrag({
         }
       }
     },
-    [noteRef, onDragEnd],
+    [noteRef, onDragCancel, onDragEnd, onDrop],
   )
 
   const handlePointerUp = useCallback(
@@ -149,12 +167,16 @@ export function useDrag({
         sessionRef.current = null
         const noteElement = noteRef.current
 
-        if (noteElement) {
-          noteElement.style.transform = ''
+        try {
+          onDragCancel?.()
+        } finally {
+          if (noteElement) {
+            noteElement.style.transform = ''
+          }
         }
       }
     },
-    [noteRef],
+    [noteRef, onDragCancel],
   )
 
   return {

@@ -3,6 +3,7 @@ import {
   NOTE_CREATION_CASCADE_OFFSET,
   type Dimensions,
   type Point,
+  type Rect,
 } from '../../domain'
 
 export interface ResizeConstraints {
@@ -51,6 +52,18 @@ export function isValidDimensions(value: unknown): value is Dimensions {
     value[0] >= 0 &&
     Number.isFinite(value[1]) &&
     value[1] >= 0
+  )
+}
+
+export function isPointInsideRect(point: Point, rect: Rect): boolean {
+  assertPoint(point, 'Point')
+  assertRect(rect, 'Rectangle')
+
+  return (
+    point[0] >= rect.x &&
+    point[0] <= rect.x + rect.width &&
+    point[1] >= rect.y &&
+    point[1] <= rect.y + rect.height
   )
 }
 
@@ -201,6 +214,21 @@ function assertDimensions(value: Dimensions, label: string): void {
   if (!isValidDimensions(value)) {
     throw new RangeError(
       `${label} must contain two finite, non-negative dimensions`,
+    )
+  }
+}
+
+function assertRect(value: Rect, label: string): void {
+  if (
+    !Number.isFinite(value.x) ||
+    !Number.isFinite(value.y) ||
+    !Number.isFinite(value.width) ||
+    value.width < 0 ||
+    !Number.isFinite(value.height) ||
+    value.height < 0
+  ) {
+    throw new RangeError(
+      `${label} must contain finite coordinates and non-negative dimensions`,
     )
   }
 }

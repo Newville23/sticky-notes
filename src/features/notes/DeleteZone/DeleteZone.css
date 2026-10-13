@@ -1,0 +1,114 @@
+.delete-zone,
+.undo-button {
+  --delete-zone-border-color: rgb(175 48 44 / 30%);
+  --delete-zone-border-active-color: rgb(175 48 44 / 65%);
+  --delete-zone-surface-color: rgb(255 246 245 / 92%);
+  --delete-zone-surface-active-color: rgb(255 226 222 / 96%);
+  --delete-zone-text-color: #8f302d;
+  --delete-zone-shadow-color: rgb(98 30 27 / 18%);
+}
+
+.delete-zone {
+  position: absolute;
+  z-index: 5;
+  bottom: 28px;
+  left: 50%;
+  display: flex;
+  min-width: 196px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border: 1px dashed var(--delete-zone-border-color);
+  border-radius: 18px;
+  opacity: 0;
+  background: var(--delete-zone-surface-color);
+  box-shadow: 0 14px 34px var(--delete-zone-shadow-color);
+  color: var(--delete-zone-text-color);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  transform: translate(-50%, 12px) scale(0.96);
+  transition:
+    opacity 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+.undo-button {
+  position: absolute;
+  z-index: 5;
+  right: 28px;
+  bottom: 28px;
+  padding: 11px 16px;
+  border: 1px solid var(--delete-zone-border-color);
+  border-radius: 14px;
+  background: var(--delete-zone-surface-color);
+  box-shadow: 0 12px 30px var(--delete-zone-shadow-color);
+  color: var(--delete-zone-text-color);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.undo-button:hover {
+  border-color: var(--delete-zone-border-active-color);
+  background: var(--delete-zone-surface-active-color);
+}
+
+.undo-button:focus-visible {
+  outline: 3px solid var(--delete-zone-border-active-color);
+  outline-offset: 3px;
+}
+
+.delete-zone--visible {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.delete-zone--active {
+  border-color: var(--delete-zone-border-active-color);
+  background: var(--delete-zone-surface-active-color);
+  transform: translate(-50%, 0) scale(1.04);
+}
+
+.delete-zone__icon {
+  position: relative;
+  width: 14px;
+  height: 15px;
+  border: 2px solid currentcolor;
+  border-top: 0;
+  border-radius: 0 0 3px 3px;
+}
+
+.delete-zone__icon::before {
+  position: absolute;
+  top: -5px;
+  left: -4px;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentcolor;
+  content: '';
+}
+
+.delete-zone__icon::after {
+  position: absolute;
+  top: -8px;
+  left: 3px;
+  width: 5px;
+  height: 3px;
+  border: 2px solid currentcolor;
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+  content: '';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .delete-zone {
+    transition: none;
+  }
+}

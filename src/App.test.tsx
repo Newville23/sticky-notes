@@ -5,7 +5,7 @@ import { useNoteStore } from './features/notes/noteStore'
 
 describe('App', () => {
   beforeEach(() => {
-    useNoteStore.setState({ notesById: {}, noteIds: [] })
+    useNoteStore.setState({ notesById: {}, noteIds: [], undoBuffer: [] })
   })
 
   it('renders the canvas with the default note configuration', () => {

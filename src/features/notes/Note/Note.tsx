@@ -15,6 +15,7 @@ import {
 } from '../../../domain'
 import { useNoteStore } from '../noteStore'
 import { useDrag } from '../hooks/useDrag'
+import { useNoteDelete } from '../hooks/useNoteDelete'
 import { useResize } from '../hooks/useResize'
 import './Note.css'
 
@@ -50,6 +51,12 @@ export const Note = memo(function Note({ id }: NoteProps) {
     [id, updateNote],
   )
   const {
+    handleDragStart: handleDeleteDragStart,
+    handleDragMove: handleDeleteDragMove,
+    handleDrop: handleDeleteDrop,
+    handleDragCancel: handleDeleteDragCancel,
+  } = useNoteDelete({ noteId: id, noteRef })
+  const {
     handlePointerDown: handleDragPointerDown,
     handlePointerMove: handleDragPointerMove,
     handlePointerUp: handleDragPointerUp,
@@ -59,6 +66,10 @@ export const Note = memo(function Note({ id }: NoteProps) {
     noteRef,
     initialNotePosition: note?.position ?? [0, 0],
     onDragEnd: commitPosition,
+    onDragStart: handleDeleteDragStart,
+    onDragMove: handleDeleteDragMove,
+    onDrop: handleDeleteDrop,
+    onDragCancel: handleDeleteDragCancel,
   })
   const {
     handlePointerDown: handleResizePointerDown,

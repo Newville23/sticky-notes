@@ -6,6 +6,7 @@ import {
   clampPosition,
   getResizeConstraints,
   isFinitePoint,
+  isPointInsideRect,
   isValidDimensions,
 } from './geometry'
 
@@ -35,6 +36,27 @@ describe('geometry', () => {
       expect(isFinitePoint(new Array(2))).toBe(false)
       expect(isValidDimensions([-1, 120])).toBe(false)
       expect(isValidDimensions([120, Number.POSITIVE_INFINITY])).toBe(false)
+    })
+  })
+
+  describe('isPointInsideRect', () => {
+    const rect = { x: 100, y: 200, width: 160, height: 80 }
+
+    it('includes points inside the rectangle and on its edges', () => {
+      expect(isPointInsideRect([180, 240], rect)).toBe(true)
+      expect(isPointInsideRect([100, 200], rect)).toBe(true)
+      expect(isPointInsideRect([260, 280], rect)).toBe(true)
+    })
+
+    it('excludes points outside the rectangle', () => {
+      expect(isPointInsideRect([99, 240], rect)).toBe(false)
+      expect(isPointInsideRect([180, 281], rect)).toBe(false)
+    })
+
+    it('rejects invalid rectangle geometry', () => {
+      expect(() =>
+        isPointInsideRect([180, 240], { ...rect, width: -1 }),
+      ).toThrow(RangeError)
     })
   })
 

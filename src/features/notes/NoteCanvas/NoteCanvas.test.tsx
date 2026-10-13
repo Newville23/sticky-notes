@@ -4,7 +4,7 @@ import { useNoteStore } from '../noteStore'
 
 describe('NoteCanvas', () => {
   beforeEach(() => {
-    useNoteStore.setState({ notesById: {}, noteIds: [] })
+    useNoteStore.setState({ notesById: {}, noteIds: [], undoBuffer: [] })
   })
 
   it('renders an accessible empty canvas', () => {
@@ -14,6 +14,7 @@ describe('NoteCanvas', () => {
       screen.getByRole('region', { name: 'Sticky notes canvas' }),
     ).toBeInTheDocument()
     expect(screen.getByText('Your canvas is ready')).toBeInTheDocument()
+    expect(document.querySelector('[data-delete-zone]')).toBeInTheDocument()
   })
 
   it('renders notes from the ID slice instead of the empty state', () => {

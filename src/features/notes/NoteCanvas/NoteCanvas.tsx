@@ -1,4 +1,5 @@
 import { memo, type Ref } from 'react'
+import { DeleteZone } from '../DeleteZone'
 import { Note } from '../Note'
 import { useNoteStore } from '../noteStore'
 import './NoteCanvas.css'
@@ -23,6 +24,7 @@ export const NoteCanvas = memo(function NoteCanvas({ ref }: NoteCanvasProps) {
       ) : (
         noteIds.map((id) => <Note key={id} id={id} />)
       )}
+      <DeleteZone />
     </section>
   )
 })

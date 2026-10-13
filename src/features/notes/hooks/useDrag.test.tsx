@@ -384,4 +384,60 @@ describe('useDrag', () => {
     expect(result.current.sessionRef.current).toBeNull()
     expect(note.style.transform).toBe('')
   })
+
+  it('does not commit movement when the drop is handled', () => {
+    const canvas = document.createElement('section')
+    const note = document.createElement('article')
+    const dragSurface = document.createElement('div')
+    const onDragEnd = vi.fn()
+    const onDrop = vi.fn(() => true)
+
+    canvas.className = 'note-canvas'
+    canvas.append(note)
+    note.append(dragSurface)
+    vi.spyOn(note, 'getBoundingClientRect').mockReturnValue(
+      createBounds({ left: 100, top: 100, width: 160, height: 160 }),
+    )
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue(
+      createBounds({ left: 0, top: 0, width: 600, height: 400 }),
+    )
+    dragSurface.setPointerCapture = vi.fn()
+    dragSurface.releasePointerCapture = vi.fn()
+
+    const noteRef: RefObject<HTMLElement | null> = { current: note }
+    const { result } = renderHook(() =>
+      useDrag({
+        noteRef,
+        initialNotePosition: [100, 100],
+        onDragEnd,
+        onDrop,
+      }),
+    )
+
+    act(() => {
+      result.current.handlePointerDown({
+        button: 0,
+        pointerId: 7,
+        clientX: 120,
+        clientY: 120,
+        currentTarget: dragSurface,
+        preventDefault: vi.fn(),
+      } as unknown as PointerEvent<HTMLElement>)
+      result.current.handlePointerMove({
+        pointerId: 7,
+        clientX: 250,
+        clientY: 320,
+      } as PointerEvent<HTMLElement>)
+      result.current.handlePointerUp({
+        pointerId: 7,
+        clientX: 250,
+        clientY: 320,
+        currentTarget: dragSurface,
+      } as unknown as PointerEvent<HTMLElement>)
+    })
+
+    expect(onDrop).toHaveBeenCalledOnce()
+    expect(onDrop).toHaveBeenCalledWith([250, 320])
+    expect(onDragEnd).not.toHaveBeenCalled()
+  })
 })
