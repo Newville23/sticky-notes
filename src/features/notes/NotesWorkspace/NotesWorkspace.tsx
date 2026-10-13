@@ -1,18 +1,18 @@
 import { useCallback, useRef } from 'react'
-import { Toolbar } from '../../components/Toolbar'
+import { Toolbar } from '../../../components/Toolbar'
 import {
   DEFAULT_NOTE_CONTENT,
   NOTE_SIZE_PRESETS,
   type Point,
-} from '../../domain'
-import { calculateNoteCreationPosition } from './geometry'
-import { NoteCanvas } from './NoteCanvas'
-import { NoteControls } from './NoteControls'
+} from '../../../domain'
+import { calculateNoteCreationPosition } from '../geometry'
+import { NoteCanvas } from '../NoteCanvas'
+import { NoteControls } from '../NoteControls'
 import {
   DEFAULT_NOTE_CREATION_CONFIGURATION,
   type NoteCreationConfiguration,
-} from './noteCreation'
-import { useNoteStore } from './noteStore'
+} from '../noteCreation'
+import { useNoteStore } from '../noteStore'
 import './NotesWorkspace.css'
 
 export function NotesWorkspace() {

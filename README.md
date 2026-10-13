@@ -1,75 +1,78 @@
-# React + TypeScript + Vite
+# Sticky Notes
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sticky Notes is a desktop focused single page application for creating and organizing plain text notes on a bounded canvas. Users can choose a note size and color, type content locally, move and resize notes with pointer interactions, delete notes through a drop zone, and restore recent deletions during five seconds undo window. The application prioritizes responsive interactions by updating the DOM directly during pointer movement and committing to global state only when an interaction finishes.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Configurable note size and background color.
+- Centered creation with deterministic cascading placement.
+- Immediate editor focus for newly created notes.
+- Plain-text validation with a limit of 2,000 characters.
+- Constraines for canvas dragging and resizing.
+- Drag to delete with multiple recoverable snapshots.
+- Five second undo window for each deleted note.
+- Application level rendering error boundary.
 
-## React Compiler
+## Technology
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 and TypeScript
+- Vite
+- Zustand
+- Vanilla CSS using BEM naming
+- Vitest, jsdom, and React Testing Library
+- ESLint and Prettier
 
-## Expanding the ESLint configuration
+## Architecture
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The application uses a small layered structure. Generic UI components live in `src/components`, note behavior and state orchestration live in `src/features/notes`, and reusable business contracts and constants live in `src/domain`. Feature hooks coordinate pointer interactions, while pure geometry utilities perform positioning, clamping, drag, resize, and hit-testing calculations independently from React.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+src/
+├── components/          Generic toolbar and error boundary
+├── domain/              Note types, geometry contracts, and constants
+├── features/notes/      Canvas, notes, controls, hooks, and Zustand store
+├── test/                Shared test setup
+├── App.tsx
+└── main.tsx
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Detailed behavior is documented in [`docs/specs`](docs/specs), with implementation phases in [`docs/PLAN.md`](docs/PLAN.md).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Requirements
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 22
+- pnpm through Corepack
 
+## Getting Started
+
+```bash
+corepack enable
+pnpm install
+pnpm dev
+```
+
+Vite will print the local development URL after startup.
+
+## Available Scripts
+
+```bash
+pnpm dev          # Start the development server
+pnpm test         # Run the test suite once
+pnpm test:watch   # Run tests in watch mode
+pnpm lint         # Run ESLint
+pnpm format       # Format the project with Prettier
+pnpm format:check # Verify formatting
+pnpm build        # Type-check and create a production build
+pnpm preview      # Preview the production build
+```
+
+## Validation
+
+The automated suite covers domain validation, store behavior, geometry constraints, creation and focus, local content editing, drag and resize performance, deletion, snapshot recovery, undo expiration, and render isolation. Before submitting changes, run:
+
+```bash
+pnpm format:check
+pnpm test
+pnpm lint
+pnpm build
 ```

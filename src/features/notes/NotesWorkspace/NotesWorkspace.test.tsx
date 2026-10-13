@@ -4,7 +4,7 @@ import { NotesWorkspace } from './NotesWorkspace'
 
 const noteCanvasRender = vi.fn()
 
-vi.mock('./NoteCanvas', () => ({
+vi.mock('../NoteCanvas', () => ({
   NoteCanvas: () => {
     noteCanvasRender()
 

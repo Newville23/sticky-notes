@@ -40,6 +40,7 @@ function setupResize({
   const onResizeEnd = vi.fn()
   const setPointerCapture = vi.fn()
   const releasePointerCapture = vi.fn()
+  let renderCount = 0
 
   canvas.className = 'note-canvas'
   canvas.append(note)
@@ -51,14 +52,16 @@ function setupResize({
   resizeHandle.releasePointerCapture = releasePointerCapture
 
   const noteRef: RefObject<HTMLElement | null> = { current: note }
-  const hook = renderHook(() =>
-    useResize({
+  const hook = renderHook(() => {
+    renderCount += 1
+
+    return useResize({
       noteRef,
       initialDimensions,
       notePosition,
       onResizeEnd,
-    }),
-  )
+    })
+  })
 
   return {
     ...hook,
@@ -68,6 +71,7 @@ function setupResize({
     onResizeEnd,
     setPointerCapture,
     releasePointerCapture,
+    getRenderCount: () => renderCount,
   }
 }
 
@@ -107,7 +111,8 @@ describe('useResize', () => {
   })
 
   it('mutates dimensions within minimum and canvas constraints', () => {
-    const { result, note, resizeHandle, canvas, onResizeEnd } = setupResize()
+    const { result, note, resizeHandle, canvas, onResizeEnd, getRenderCount } =
+      setupResize()
 
     act(() => {
       result.current.handlePointerDown(createPointerDownEvent(resizeHandle))
@@ -136,6 +141,7 @@ describe('useResize', () => {
     ])
     expect(canvas.getBoundingClientRect).toHaveBeenCalledOnce()
     expect(onResizeEnd).not.toHaveBeenCalled()
+    expect(getRenderCount()).toBe(1)
   })
 
   it('commits final dimensions once and cleans up on pointer release', () => {

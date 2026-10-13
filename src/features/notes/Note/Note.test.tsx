@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { Profiler } from 'react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MAX_NOTE_CONTENT_LENGTH, type NoteId } from '../../../domain'
 import { DeleteZone } from '../DeleteZone'
@@ -76,6 +77,57 @@ describe('Note', () => {
     expect(onStoreChange).toHaveBeenCalledOnce()
 
     unsubscribe()
+  })
+
+  it('prevents content from exceeding the maximum length', async () => {
+    const user = userEvent.setup()
+
+    render(<Note id={noteId} />)
+    const editor = screen.getByRole('textbox', { name: 'Note content' })
+
+    await user.type(editor, 'a'.repeat(MAX_NOTE_CONTENT_LENGTH + 1))
+
+    expect(editor).toHaveValue('a'.repeat(MAX_NOTE_CONTENT_LENGTH))
+    expect(useNoteStore.getState().notesById[noteId].content).toBe('')
+  })
+
+  it('does not rerender an unrelated note when content is committed', async () => {
+    const user = userEvent.setup()
+    const secondNoteId = useNoteStore.getState().createNote({
+      content: '',
+      position: [300, 100],
+      dimensions: [160, 160],
+      background: 'green',
+    })
+    const firstNoteRender = vi.fn()
+    const secondNoteRender = vi.fn()
+
+    render(
+      <>
+        <Profiler id="first-note" onRender={firstNoteRender}>
+          <Note id={noteId} />
+        </Profiler>
+        <Profiler id="second-note" onRender={secondNoteRender}>
+          <Note id={secondNoteId} />
+        </Profiler>
+      </>,
+    )
+    const [firstEditor] = screen.getAllByRole('textbox', {
+      name: 'Note content',
+    })
+
+    firstNoteRender.mockClear()
+    secondNoteRender.mockClear()
+
+    await user.type(firstEditor, 'Local draft')
+
+    expect(firstNoteRender).not.toHaveBeenCalled()
+    expect(secondNoteRender).not.toHaveBeenCalled()
+
+    act(() => fireEvent.blur(firstEditor))
+
+    expect(firstNoteRender).toHaveBeenCalledOnce()
+    expect(secondNoteRender).not.toHaveBeenCalled()
   })
 
   it('routes pointer interaction only through the drag surface', () => {
