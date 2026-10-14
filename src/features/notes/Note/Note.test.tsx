@@ -486,7 +486,7 @@ describe('Note', () => {
     expect(resizeHandle.releasePointerCapture).toHaveBeenCalledWith(9)
   })
 
-  it('deletes the note only when its border box covers the delete zone threshold', () => {
+  it('deletes the note when its border box touches the delete zone', () => {
     const { container } = render(
       <section className="note-canvas">
         <Note id={noteId} />
@@ -553,8 +553,8 @@ describe('Note', () => {
 
     fireEvent.pointerMove(dragSurface, {
       pointerId: 5,
-      clientX: 250,
-      clientY: 320,
+      clientX: 60,
+      clientY: 260,
     })
 
     expect(deleteZone).toHaveClass('delete-zone--active')
@@ -562,8 +562,8 @@ describe('Note', () => {
 
     fireEvent.pointerUp(dragSurface, {
       pointerId: 5,
-      clientX: 250,
-      clientY: 320,
+      clientX: 60,
+      clientY: 260,
     })
 
     expect(useNoteStore.getState().notesById[noteId]).toBeUndefined()

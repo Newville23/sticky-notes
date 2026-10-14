@@ -1,11 +1,6 @@
 import { useCallback, useRef, type RefObject } from 'react'
-import {
-  DELETE_ZONE_OCCUPANCY_THRESHOLD,
-  type NoteId,
-  type Point,
-  type Rect,
-} from '../../../domain'
-import { calculateDeleteZoneOccupancy } from '../geometry'
+import { type NoteId, type Point, type Rect } from '../../../domain'
+import { rectTouch } from '../geometry'
 import { useNoteStore, type DeletedNoteSnapshot } from '../noteStore'
 import type { DragSession } from './useDrag'
 
@@ -73,7 +68,7 @@ export function useNoteDelete({ noteId, noteRef }: UseNoteDeleteParams) {
     [noteId, noteRef],
   )
 
-  const getOccupancy = useCallback(
+  const isTouchingDeleteZone = useCallback(
     (session: NoteDeleteSession, position: Point) => {
       const noteRect: Rect = {
         x:
@@ -88,7 +83,7 @@ export function useNoteDelete({ noteId, noteRef }: UseNoteDeleteParams) {
         height: session.initialNoteBounds.height,
       }
 
-      return calculateDeleteZoneOccupancy(noteRect, session.deleteZoneBounds)
+      return rectTouch(noteRect, session.deleteZoneBounds)
     },
     [],
   )
@@ -101,15 +96,14 @@ export function useNoteDelete({ noteId, noteRef }: UseNoteDeleteParams) {
         return
       }
 
-      const isActive =
-        getOccupancy(session, position) >= DELETE_ZONE_OCCUPANCY_THRESHOLD
+      const isActive = isTouchingDeleteZone(session, position)
 
       if (isActive !== session.isActive) {
         session.isActive = isActive
         session.deleteZone.classList.toggle('delete-zone--active', isActive)
       }
     },
-    [getOccupancy],
+    [isTouchingDeleteZone],
   )
 
   const handleDrop = useCallback(
@@ -121,8 +115,7 @@ export function useNoteDelete({ noteId, noteRef }: UseNoteDeleteParams) {
       }
 
       sessionRef.current = null
-      const shouldDelete =
-        getOccupancy(session, position) >= DELETE_ZONE_OCCUPANCY_THRESHOLD
+      const shouldDelete = isTouchingDeleteZone(session, position)
 
       try {
         if (!shouldDelete) {
@@ -134,7 +127,7 @@ export function useNoteDelete({ noteId, noteRef }: UseNoteDeleteParams) {
         hideDeleteZone(session)
       }
     },
-    [deleteNote, getOccupancy, noteId],
+    [deleteNote, isTouchingDeleteZone, noteId],
   )
 
   const handleDragCancel = useCallback(() => {

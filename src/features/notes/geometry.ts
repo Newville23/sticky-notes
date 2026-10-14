@@ -65,39 +65,16 @@ export function isValidDimensions(value: unknown): value is Dimensions {
   )
 }
 
-export function calculateRectIntersection(first: Rect, second: Rect): Rect {
+export function rectTouch(first: Rect, second: Rect): boolean {
   assertRect(first, 'First rectangle')
   assertRect(second, 'Second rectangle')
 
-  const x = Math.max(first.x, second.x)
-  const y = Math.max(first.y, second.y)
-  const right = Math.min(first.x + first.width, second.x + second.width)
-  const bottom = Math.min(first.y + first.height, second.y + second.height)
-
-  return {
-    x,
-    y,
-    width: Math.max(0, right - x),
-    height: Math.max(0, bottom - y),
-  }
-}
-
-export function calculateDeleteZoneOccupancy(
-  noteRect: Rect,
-  deleteZoneRect: Rect,
-): number {
-  assertRect(noteRect, 'Note rectangle')
-  assertRect(deleteZoneRect, 'Delete-zone rectangle')
-
-  const deleteZoneArea = deleteZoneRect.width * deleteZoneRect.height
-
-  if (deleteZoneArea === 0) {
-    return 0
-  }
-
-  const intersection = calculateRectIntersection(noteRect, deleteZoneRect)
-
-  return (intersection.width * intersection.height) / deleteZoneArea
+  return (
+    first.x <= second.x + second.width &&
+    first.x + first.width >= second.x &&
+    first.y <= second.y + second.height &&
+    first.y + first.height >= second.y
+  )
 }
 
 export function clamp(value: number, minimum: number, maximum: number): number {

@@ -1,14 +1,13 @@
 import {
   calculateDragPosition,
-  calculateDeleteZoneOccupancy,
   calculateNoteCreationPosition,
-  calculateRectIntersection,
   calculateResizeDimensions,
   clamp,
   clampPosition,
   getResizeConstraints,
   isFinitePoint,
   isValidDimensions,
+  rectTouch,
 } from './geometry'
 
 describe('geometry', () => {
@@ -40,60 +39,36 @@ describe('geometry', () => {
     })
   })
 
-  describe('rectangle intersection and delete-zone occupancy', () => {
+  describe('rectangle contact', () => {
     const deleteZone = { x: 200, y: 300, width: 200, height: 60 }
 
-    it('calculates the overlapping rectangle', () => {
+    it('detects overlapping rectangles', () => {
       expect(
-        calculateRectIntersection(
-          { x: 230, y: 280, width: 160, height: 160 },
-          deleteZone,
-        ),
-      ).toEqual({ x: 230, y: 300, width: 160, height: 60 })
+        rectTouch({ x: 230, y: 300, width: 160, height: 160 }, deleteZone),
+      ).toBe(true)
     })
 
-    it('returns a zero-area intersection for separated rectangles', () => {
+    it('counts exact edge and corner contact as touching', () => {
       expect(
-        calculateRectIntersection(
-          { x: 0, y: 0, width: 160, height: 160 },
-          deleteZone,
-        ),
-      ).toEqual({ x: 200, y: 300, width: 0, height: 0 })
+        rectTouch({ x: 40, y: 300, width: 160, height: 160 }, deleteZone),
+      ).toBe(true)
+      expect(
+        rectTouch({ x: 40, y: 140, width: 160, height: 160 }, deleteZone),
+      ).toBe(true)
     })
 
-    it('measures occupancy relative to the delete-zone area', () => {
+    it('rejects rectangles separated by one pixel', () => {
       expect(
-        calculateDeleteZoneOccupancy(
-          { x: 230, y: 300, width: 160, height: 160 },
-          deleteZone,
-        ),
-      ).toBe(0.8)
+        rectTouch({ x: 39, y: 300, width: 160, height: 160 }, deleteZone),
+      ).toBe(false)
       expect(
-        calculateDeleteZoneOccupancy(
-          { x: 390, y: 300, width: 160, height: 160 },
-          deleteZone,
-        ),
-      ).toBe(0.05)
-      expect(
-        calculateDeleteZoneOccupancy(
-          { x: 391, y: 300, width: 160, height: 160 },
-          deleteZone,
-        ),
-      ).toBeCloseTo(0.045)
+        rectTouch({ x: 40, y: 139, width: 160, height: 160 }, deleteZone),
+      ).toBe(false)
     })
 
-    it('returns zero for an empty delete zone and rejects invalid rectangles', () => {
-      expect(
-        calculateDeleteZoneOccupancy(
-          { x: 0, y: 0, width: 160, height: 160 },
-          { x: 0, y: 0, width: 0, height: 60 },
-        ),
-      ).toBe(0)
+    it('rejects invalid rectangles', () => {
       expect(() =>
-        calculateDeleteZoneOccupancy(
-          { x: 0, y: 0, width: -1, height: 160 },
-          deleteZone,
-        ),
+        rectTouch({ x: 0, y: 0, width: -1, height: 160 }, deleteZone),
       ).toThrow(RangeError)
     })
   })

@@ -65,16 +65,17 @@
 - Verify a single global-state commit on interaction completion and narrow rerenders so updating one note does not rerender unrelated notes.
 - Run smoke tests in the latest stable Chrome and Firefox at the minimum supported viewport of `1024 × 768`.
 
-## 8. Delete-Zone Occupancy Refinement
+## 8. Delete-Zone Rectangle-Contact Refinement
 
 - Increase the minimum note dimensions from `120 × 120` to `160 × 160` pixels.
-- Add pure geometry utilities for rectangle intersection and delete-zone occupancy.
-- Replace pointer-based deletion detection with note-rectangle occupancy using a `5%` threshold.
-- Cache the delete-zone bounds at drag start and derive the moving note rectangle without layout reads during `pointermove`.
-- Activate the delete zone when the threshold is reached, but delete only on `pointerup`.
-- Commit movement normally below the threshold and preserve cancellation rollback and pointer-capture cleanup.
+- Add a pure `rectTouch` geometry utility that detects inclusive contact between two border-box rectangles, including overlap and shared edges or corners.
+- Replace pointer-based and percentage-occupancy deletion detection with contact between the note border box and the delete-zone hitbox.
+- Keep the delete-zone hitbox stable while its visible and active presentation animates.
+- Cache the stable delete-zone bounds at drag start and derive the moving note rectangle without layout reads during `pointermove`.
+- Activate the delete zone while the rectangles touch, but delete only on `pointerup` when they still touch.
+- Commit movement normally when the rectangles are separated and preserve cancellation rollback and pointer-capture cleanup.
 - Store the pre-drag persisted note snapshot for undo.
-- Add geometry and interaction tests for threshold boundaries, minimum-size feasibility, deletion, non-deletion, cancellation, and undo restoration.
+- Add geometry and interaction tests for overlap, exact edge and corner contact, one-pixel separation, pass-through without deletion, release-time deletion, cancellation, and undo restoration.
 
 ## 9. Canvas Double-Click Creation Refinement
 

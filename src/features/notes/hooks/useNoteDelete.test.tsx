@@ -96,32 +96,32 @@ describe('useNoteDelete', () => {
     })
   })
 
-  it('updates only the zone state when note occupancy crosses 5%', () => {
+  it('updates only the zone state when the rectangles start and stop touching', () => {
     const { result, deleteZone, dragSession } = setupDeleteHook(noteId)
     const beforeMove = useNoteStore.getState()
 
     act(() => {
       result.current.handleDragStart(dragSession)
-      result.current.handleDragMove([390, 300])
+      result.current.handleDragMove([40, 300])
     })
 
     expect(deleteZone).toHaveClass('delete-zone--active')
     expect(useNoteStore.getState()).toBe(beforeMove)
 
-    act(() => result.current.handleDragMove([391, 300]))
+    act(() => result.current.handleDragMove([39, 300]))
 
     expect(deleteZone).not.toHaveClass('delete-zone--active')
     expect(useNoteStore.getState().notesById[noteId]).toBeDefined()
     expect(deleteZone.getBoundingClientRect).toHaveBeenCalledOnce()
   })
 
-  it('deletes at the exact occupancy threshold regardless of pointer location', () => {
+  it('deletes on exact edge contact regardless of pointer location', () => {
     const { result, deleteZone, dragSession } = setupDeleteHook(noteId)
     let dropHandled = false
 
     act(() => {
       result.current.handleDragStart(dragSession)
-      dropHandled = result.current.handleDrop([390, 300])
+      dropHandled = result.current.handleDrop([40, 300])
     })
 
     expect(dropHandled).toBe(true)
@@ -135,19 +135,38 @@ describe('useNoteDelete', () => {
     expect(result.current.sessionRef.current).toBeNull()
   })
 
-  it('keeps the note and cleans up when occupancy is below the threshold', () => {
+  it('keeps the note and cleans up when the rectangles are separated', () => {
     const { result, deleteZone, dragSession } = setupDeleteHook(noteId)
     let dropHandled = true
 
     act(() => {
       result.current.handleDragStart(dragSession)
-      dropHandled = result.current.handleDrop([391, 300])
+      dropHandled = result.current.handleDrop([39, 300])
     })
 
     expect(dropHandled).toBe(false)
     expect(useNoteStore.getState().notesById[noteId]).toBeDefined()
     expect(deleteZone).not.toHaveClass('delete-zone--visible')
     expect(deleteZone).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('does not delete after touching the zone and moving away before release', () => {
+    const { result, deleteZone, dragSession } = setupDeleteHook(noteId)
+    let dropHandled = true
+
+    act(() => {
+      result.current.handleDragStart(dragSession)
+      result.current.handleDragMove([40, 300])
+      result.current.handleDragMove([39, 300])
+      dropHandled = result.current.handleDrop([39, 300])
+    })
+
+    expect(dropHandled).toBe(false)
+    expect(useNoteStore.getState().notesById[noteId]).toBeDefined()
+    expect(deleteZone).not.toHaveClass(
+      'delete-zone--visible',
+      'delete-zone--active',
+    )
   })
 
   it('stores the exact pre-drag persisted snapshot for undo', () => {
@@ -157,7 +176,7 @@ describe('useNoteDelete', () => {
     act(() => {
       result.current.handleDragStart(dragSession)
       useNoteStore.getState().updateNote(noteId, { position: [140, 140] })
-      result.current.handleDrop([390, 300])
+      result.current.handleDrop([40, 300])
     })
 
     const [entry] = useNoteStore.getState().undoBuffer
@@ -176,7 +195,7 @@ describe('useNoteDelete', () => {
 
     act(() => {
       result.current.handleDragStart(dragSession)
-      result.current.handleDragMove([390, 300])
+      result.current.handleDragMove([40, 300])
       result.current.handleDragCancel()
     })
 

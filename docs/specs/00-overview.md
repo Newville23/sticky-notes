@@ -157,7 +157,7 @@ Dropping a note inside the delete zone removes it immediately from visible state
 
 Deleted notes must remain recoverable for up to 5 seconds. During this period, the user must be able to undo the deletion and restore the note to its exact previous state, including its content, position, dimensions, background, and identifier with the help of its snapshot.
 
-A note must be deleted only when the pointer is released inside the delete zone. Moving a note over the delete zone without releasing it must not delete the note.
+A note must be deleted only when the pointer is released while the note's border box touches or overlaps the delete-zone hitbox. The pointer position is irrelevant, and moving a note over the delete zone without releasing it must not delete the note.
 
 ## Reliability
 The application must prevent invalid geometry from entering state. Note positions and dimensions must remain valid numeric values, and notes must remain accessible within the canvas boundaries.

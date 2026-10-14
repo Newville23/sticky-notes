@@ -30,6 +30,9 @@ describe('DeleteZone', () => {
     expect(deleteZone).toHaveClass('delete-zone')
     expect(deleteZone).not.toHaveClass('delete-zone--visible')
     expect(deleteZone).toHaveAttribute('aria-hidden', 'true')
+    expect(
+      deleteZone?.querySelector('.delete-zone__surface'),
+    ).toBeInTheDocument()
     expect(screen.getByText('Drop here to delete')).toBeInTheDocument()
   })
 

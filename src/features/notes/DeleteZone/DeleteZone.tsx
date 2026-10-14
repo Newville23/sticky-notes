@@ -15,8 +15,10 @@ export const DeleteZone = memo(function DeleteZone({ ref }: DeleteZoneProps) {
         data-delete-zone=""
         aria-hidden="true"
       >
-        <span className="delete-zone__icon" aria-hidden="true" />
-        <span className="delete-zone__label">Drop here to delete</span>
+        <div className="delete-zone__surface">
+          <span className="delete-zone__icon" aria-hidden="true" />
+          <span className="delete-zone__label">Drop here to delete</span>
+        </div>
       </div>
       <UndoToasts />
     </>

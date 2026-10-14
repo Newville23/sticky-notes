@@ -9,13 +9,19 @@
 }
 
 .delete-zone {
-  box-sizing: border-box;
   position: absolute;
   z-index: 5;
   bottom: 28px;
   left: 50%;
-  display: flex;
   min-width: 196px;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.delete-zone__surface {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -29,8 +35,7 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  pointer-events: none;
-  transform: translate(-50%, 12px) scale(0.96);
+  transform: translateY(12px) scale(0.96);
   transition:
     opacity 140ms ease,
     background-color 140ms ease,
@@ -83,15 +88,15 @@
   border: 0;
 }
 
-.delete-zone--visible {
+.delete-zone--visible .delete-zone__surface {
   opacity: 1;
-  transform: translate(-50%, 0) scale(1);
+  transform: translateY(0) scale(1);
 }
 
-.delete-zone--active {
+.delete-zone--active .delete-zone__surface {
   border-color: var(--delete-zone-border-active-color);
   background: var(--delete-zone-surface-active-color);
-  transform: translate(-50%, 0) scale(1.04);
+  transform: translateY(0) scale(1.04);
 }
 
 .delete-zone__icon {
@@ -127,7 +132,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .delete-zone {
+  .delete-zone__surface {
     transition: none;
   }
 }
