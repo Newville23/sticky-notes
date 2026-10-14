@@ -9,8 +9,8 @@ Allow the user to delete a note by dragging it into the delete zone and restore 
 - The delete zone must be visible during note dragging.
 - The minimum note dimensions are `160 × 160` pixels.
 - Delete-zone occupancy is `intersection area(note, zone) / area(zone)`, using the note's border box.
-- The delete zone becomes active when occupancy reaches `75%`.
-- A note is deleted only when `pointerup` occurs while occupancy is at least `75%`; the pointer position is irrelevant.
+- The delete zone becomes active when occupancy reaches `5%`.
+- A note is deleted only when `pointerup` occurs while occupancy is at least `5%`; the pointer position is irrelevant.
 - Passing over the delete zone must not delete the note.
 - Releasing below the threshold commits the drag normally; cancelling the interaction restores its starting position.
 - Deletion must remove the note immediately from visible state.
@@ -26,10 +26,10 @@ Allow the user to delete a note by dragging it into the delete zone and restore 
 ## Acceptance Criteria
 
 **Given** an active note drag\
-**When** at least 75% of the delete zone is covered by the note and the note is released\
+**When** at least 5% of the delete zone is covered by the note and the note is released\
 **Then** the note is immediately removed and its individual undo toast becomes available.
 
-**Given** occupancy is below 75%\
+**Given** occupancy is below 5%\
 **When** the note is released\
 **Then** the note is moved normally and is not deleted.
 

@@ -96,19 +96,19 @@ describe('useNoteDelete', () => {
     })
   })
 
-  it('updates only the zone state when note occupancy crosses 75%', () => {
+  it('updates only the zone state when note occupancy crosses 5%', () => {
     const { result, deleteZone, dragSession } = setupDeleteHook(noteId)
     const beforeMove = useNoteStore.getState()
 
     act(() => {
       result.current.handleDragStart(dragSession)
-      result.current.handleDragMove([250, 300])
+      result.current.handleDragMove([390, 300])
     })
 
     expect(deleteZone).toHaveClass('delete-zone--active')
     expect(useNoteStore.getState()).toBe(beforeMove)
 
-    act(() => result.current.handleDragMove([251, 300]))
+    act(() => result.current.handleDragMove([391, 300]))
 
     expect(deleteZone).not.toHaveClass('delete-zone--active')
     expect(useNoteStore.getState().notesById[noteId]).toBeDefined()
@@ -121,7 +121,7 @@ describe('useNoteDelete', () => {
 
     act(() => {
       result.current.handleDragStart(dragSession)
-      dropHandled = result.current.handleDrop([250, 300])
+      dropHandled = result.current.handleDrop([390, 300])
     })
 
     expect(dropHandled).toBe(true)
@@ -141,7 +141,7 @@ describe('useNoteDelete', () => {
 
     act(() => {
       result.current.handleDragStart(dragSession)
-      dropHandled = result.current.handleDrop([251, 300])
+      dropHandled = result.current.handleDrop([391, 300])
     })
 
     expect(dropHandled).toBe(false)
@@ -157,7 +157,7 @@ describe('useNoteDelete', () => {
     act(() => {
       result.current.handleDragStart(dragSession)
       useNoteStore.getState().updateNote(noteId, { position: [140, 140] })
-      result.current.handleDrop([250, 300])
+      result.current.handleDrop([390, 300])
     })
 
     const [entry] = useNoteStore.getState().undoBuffer
@@ -176,7 +176,7 @@ describe('useNoteDelete', () => {
 
     act(() => {
       result.current.handleDragStart(dragSession)
-      result.current.handleDragMove([250, 300])
+      result.current.handleDragMove([390, 300])
       result.current.handleDragCancel()
     })
 

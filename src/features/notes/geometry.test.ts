@@ -70,16 +70,16 @@ describe('geometry', () => {
       ).toBe(0.8)
       expect(
         calculateDeleteZoneOccupancy(
-          { x: 250, y: 300, width: 160, height: 160 },
+          { x: 390, y: 300, width: 160, height: 160 },
           deleteZone,
         ),
-      ).toBe(0.75)
+      ).toBe(0.05)
       expect(
         calculateDeleteZoneOccupancy(
-          { x: 251, y: 300, width: 160, height: 160 },
+          { x: 391, y: 300, width: 160, height: 160 },
           deleteZone,
         ),
-      ).toBeCloseTo(0.745)
+      ).toBeCloseTo(0.045)
     })
 
     it('returns zero for an empty delete zone and rejects invalid rectangles', () => {

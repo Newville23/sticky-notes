@@ -69,7 +69,7 @@
 
 - Increase the minimum note dimensions from `120 × 120` to `160 × 160` pixels.
 - Add pure geometry utilities for rectangle intersection and delete-zone occupancy.
-- Replace pointer-based deletion detection with note-rectangle occupancy using a `75%` threshold.
+- Replace pointer-based deletion detection with note-rectangle occupancy using a `5%` threshold.
 - Cache the delete-zone bounds at drag start and derive the moving note rectangle without layout reads during `pointermove`.
 - Activate the delete zone when the threshold is reached, but delete only on `pointerup`.
 - Commit movement normally below the threshold and preserve cancellation rollback and pointer-capture cleanup.
