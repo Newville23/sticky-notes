@@ -1,5 +1,5 @@
 import { memo, type Ref } from 'react'
-import { UndoButton } from './UndoButton'
+import { UndoToasts } from './UndoToasts'
 import './DeleteZone.css'
 
 export interface DeleteZoneProps {
@@ -18,7 +18,7 @@ export const DeleteZone = memo(function DeleteZone({ ref }: DeleteZoneProps) {
         <span className="delete-zone__icon" aria-hidden="true" />
         <span className="delete-zone__label">Drop here to delete</span>
       </div>
-      <UndoButton />
+      <UndoToasts />
     </>
   )
 })

@@ -4,7 +4,12 @@ import { useNoteStore } from '../noteStore'
 
 describe('NoteCanvas', () => {
   beforeEach(() => {
-    useNoteStore.setState({ notesById: {}, noteIds: [], undoBuffer: [] })
+    useNoteStore.setState({
+      notesById: {},
+      noteIds: [],
+      undoBuffer: [],
+      nextDeletionNumber: 1,
+    })
   })
 
   it('renders an accessible empty canvas', () => {

@@ -21,6 +21,7 @@ describe('noteStore', () => {
       notesById: {},
       noteIds: [],
       undoBuffer: [],
+      nextDeletionNumber: 1,
     })
   })
 
@@ -108,7 +109,8 @@ describe('noteStore', () => {
   })
 
   it('deletes a note and restores its exact snapshot and ordering', () => {
-    const { createNote, deleteNote, restoreNote } = useNoteStore.getState()
+    const { createNote, deleteNote, restoreDeletedNote } =
+      useNoteStore.getState()
     const firstId = createNote(firstNoteInput)
     const secondId = createNote(secondNoteInput)
     const deletedNote = useNoteStore.getState().notesById[firstId]
@@ -119,13 +121,17 @@ describe('noteStore', () => {
     expect(useNoteStore.getState().notesById[firstId]).toBeUndefined()
     expect(useNoteStore.getState().noteIds).toEqual([secondId])
     expect(useNoteStore.getState().undoBuffer).toHaveLength(1)
-    expect(useNoteStore.getState().undoBuffer[0].snapshot).toEqual(snapshot)
+    expect(useNoteStore.getState().undoBuffer[0]).toMatchObject({
+      deletionNumber: 1,
+      snapshot,
+    })
+    expect(useNoteStore.getState().nextDeletionNumber).toBe(2)
 
     if (!snapshot) {
       throw new Error('Expected the deleted note snapshot')
     }
 
-    restoreNote(snapshot)
+    restoreDeletedNote(1)
 
     expect(useNoteStore.getState().notesById[firstId]).toBe(deletedNote)
     expect(useNoteStore.getState().noteIds).toEqual([firstId, secondId])
@@ -144,10 +150,15 @@ describe('noteStore', () => {
     expect(
       useNoteStore
         .getState()
+        .undoBuffer.map(({ deletionNumber }) => deletionNumber),
+    ).toEqual([1, 2])
+    expect(
+      useNoteStore
+        .getState()
         .undoBuffer.map(({ snapshot }) => snapshot.note.id),
     ).toEqual([firstId, secondId])
 
-    discardDeletedNote(firstId)
+    discardDeletedNote(1)
 
     expect(
       useNoteStore
@@ -156,21 +167,44 @@ describe('noteStore', () => {
     ).toEqual([secondId])
   })
 
+  it('keeps deletion numbers monotonic after restore and expiry cleanup', () => {
+    const { createNote, deleteNote, restoreDeletedNote, discardDeletedNote } =
+      useNoteStore.getState()
+    const firstId = createNote(firstNoteInput)
+
+    deleteNote(firstId)
+    restoreDeletedNote(1)
+    deleteNote(firstId)
+    discardDeletedNote(2)
+    const secondId = createNote(secondNoteInput)
+    deleteNote(secondId)
+
+    expect(useNoteStore.getState().undoBuffer).toMatchObject([
+      { deletionNumber: 3 },
+    ])
+    expect(useNoteStore.getState().nextDeletionNumber).toBe(4)
+  })
+
   it('does not overwrite a note when restoring a duplicate ID', () => {
-    const { createNote, restoreNote } = useNoteStore.getState()
+    const { createNote, deleteNote, restoreDeletedNote } =
+      useNoteStore.getState()
     const id = createNote(firstNoteInput)
-    const beforeRestore = useNoteStore.getState()
+    deleteNote(id)
     const conflictingNote: Note = {
       ...secondNoteInput,
       id,
     }
+    useNoteStore.setState((state) => ({
+      notesById: { [id]: conflictingNote },
+      noteIds: [id],
+      undoBuffer: state.undoBuffer,
+    }))
+    const beforeRestore = useNoteStore.getState()
 
-    restoreNote({ note: conflictingNote, index: 0 })
+    restoreDeletedNote(1)
 
     expect(useNoteStore.getState()).toBe(beforeRestore)
-    expect(useNoteStore.getState().notesById[id]).toEqual({
-      id,
-      ...firstNoteInput,
-    })
+    expect(useNoteStore.getState().notesById[id]).toBe(conflictingNote)
+    expect(useNoteStore.getState().undoBuffer).toHaveLength(1)
   })
 })

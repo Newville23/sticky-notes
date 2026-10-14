@@ -17,6 +17,7 @@ export interface DeletedNoteSnapshot {
 }
 
 export interface UndoBufferEntry {
+  readonly deletionNumber: number
   readonly snapshot: DeletedNoteSnapshot
   readonly expiresAt: number
 }
@@ -25,6 +26,7 @@ export interface NoteState {
   readonly notesById: Record<NoteId, Note>
   readonly noteIds: NoteId[]
   readonly undoBuffer: UndoBufferEntry[]
+  readonly nextDeletionNumber: number
 }
 
 export interface NoteActions {
@@ -34,8 +36,8 @@ export interface NoteActions {
     id: NoteId,
     snapshot?: DeletedNoteSnapshot,
   ) => DeletedNoteSnapshot | undefined
-  readonly restoreNote: (snapshot: DeletedNoteSnapshot) => void
-  readonly discardDeletedNote: (id: NoteId) => void
+  readonly restoreDeletedNote: (deletionNumber: number) => void
+  readonly discardDeletedNote: (deletionNumber: number) => void
 }
 
 export type NoteStore = NoteState & NoteActions
@@ -44,6 +46,7 @@ const initialNoteState: NoteState = {
   notesById: {},
   noteIds: [],
   undoBuffer: [],
+  nextDeletionNumber: 1,
 }
 
 export const useNoteStore = create<NoteStore>()((set, get) => ({
@@ -130,9 +133,11 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       return {
         notesById,
         noteIds: state.noteIds.filter((noteId) => noteId !== id),
+        nextDeletionNumber: state.nextDeletionNumber + 1,
         undoBuffer: [
           ...state.undoBuffer,
           {
+            deletionNumber: state.nextDeletionNumber,
             snapshot,
             expiresAt: Date.now() + DELETE_UNDO_WINDOW_MS,
           },
@@ -143,8 +148,18 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     return deletedSnapshot
   },
 
-  restoreNote: ({ note, index }) => {
+  restoreDeletedNote: (deletionNumber) => {
     set((state) => {
+      const entry = state.undoBuffer.find(
+        (candidate) => candidate.deletionNumber === deletionNumber,
+      )
+
+      if (!entry) {
+        return state
+      }
+
+      const { note, index } = entry.snapshot
+
       if (state.notesById[note.id]) {
         return state
       }
@@ -160,16 +175,16 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         },
         noteIds,
         undoBuffer: state.undoBuffer.filter(
-          ({ snapshot }) => snapshot.note.id !== note.id,
+          (candidate) => candidate.deletionNumber !== deletionNumber,
         ),
       }
     })
   },
 
-  discardDeletedNote: (id) => {
+  discardDeletedNote: (deletionNumber) => {
     set((state) => {
       const undoBuffer = state.undoBuffer.filter(
-        ({ snapshot }) => snapshot.note.id !== id,
+        (candidate) => candidate.deletionNumber !== deletionNumber,
       )
 
       return undoBuffer.length === state.undoBuffer.length

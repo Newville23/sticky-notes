@@ -10,7 +10,12 @@ describe('Note', () => {
   let noteId: NoteId
 
   beforeEach(() => {
-    useNoteStore.setState({ notesById: {}, noteIds: [], undoBuffer: [] })
+    useNoteStore.setState({
+      notesById: {},
+      noteIds: [],
+      undoBuffer: [],
+      nextDeletionNumber: 1,
+    })
     noteId = useNoteStore.getState().createNote({
       content: '',
       position: [100, 100],
@@ -85,7 +90,10 @@ describe('Note', () => {
     render(<Note id={noteId} />)
     const editor = screen.getByRole('textbox', { name: 'Note content' })
 
-    await user.type(editor, 'a'.repeat(MAX_NOTE_CONTENT_LENGTH + 1))
+    fireEvent.change(editor, {
+      target: { value: 'a'.repeat(MAX_NOTE_CONTENT_LENGTH) },
+    })
+    await user.type(editor, 'b')
 
     expect(editor).toHaveValue('a'.repeat(MAX_NOTE_CONTENT_LENGTH))
     expect(useNoteStore.getState().notesById[noteId].content).toBe('')

@@ -1,5 +1,5 @@
 .delete-zone,
-.undo-button {
+.undo-toast {
   --delete-zone-border-color: rgb(175 48 44 / 30%);
   --delete-zone-border-active-color: rgb(175 48 44 / 65%);
   --delete-zone-surface-color: rgb(255 246 245 / 92%);
@@ -38,11 +38,18 @@
     transform 140ms ease;
 }
 
-.undo-button {
+.undo-toasts {
   position: absolute;
   z-index: 5;
   right: 28px;
   bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.undo-toast {
   padding: 11px 16px;
   border: 1px solid var(--delete-zone-border-color);
   border-radius: 14px;
@@ -55,14 +62,25 @@
   font-weight: 750;
 }
 
-.undo-button:hover {
+.undo-toast:hover {
   border-color: var(--delete-zone-border-active-color);
   background: var(--delete-zone-surface-active-color);
 }
 
-.undo-button:focus-visible {
+.undo-toast:focus-visible {
   outline: 3px solid var(--delete-zone-border-active-color);
   outline-offset: 3px;
+}
+
+.undo-toasts__announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .delete-zone--visible {

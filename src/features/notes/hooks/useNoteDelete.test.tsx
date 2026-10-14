@@ -61,7 +61,12 @@ describe('useNoteDelete', () => {
   let noteId: NoteId
 
   beforeEach(() => {
-    useNoteStore.setState({ notesById: {}, noteIds: [], undoBuffer: [] })
+    useNoteStore.setState({
+      notesById: {},
+      noteIds: [],
+      undoBuffer: [],
+      nextDeletionNumber: 1,
+    })
     noteId = useNoteStore.getState().createNote({
       content: 'Recoverable note',
       position: [100, 100],
@@ -158,7 +163,7 @@ describe('useNoteDelete', () => {
     const [entry] = useNoteStore.getState().undoBuffer
     expect(entry.snapshot).toEqual({ note: preDragNote, index: 0 })
 
-    act(() => useNoteStore.getState().restoreNote(entry.snapshot))
+    act(() => useNoteStore.getState().restoreDeletedNote(entry.deletionNumber))
 
     expect(useNoteStore.getState().notesById[noteId]).toBe(preDragNote)
     expect(useNoteStore.getState().notesById[noteId].position).toEqual([

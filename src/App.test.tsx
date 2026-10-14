@@ -5,7 +5,12 @@ import { useNoteStore } from './features/notes/noteStore'
 
 describe('App', () => {
   beforeEach(() => {
-    useNoteStore.setState({ notesById: {}, noteIds: [], undoBuffer: [] })
+    useNoteStore.setState({
+      notesById: {},
+      noteIds: [],
+      undoBuffer: [],
+      nextDeletionNumber: 1,
+    })
   })
 
   it('renders the canvas with the default note configuration', () => {
