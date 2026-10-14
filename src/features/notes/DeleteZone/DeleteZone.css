@@ -9,6 +9,7 @@
 }
 
 .delete-zone {
+  box-sizing: border-box;
   position: absolute;
   z-index: 5;
   bottom: 28px;

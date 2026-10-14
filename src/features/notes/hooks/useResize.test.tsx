@@ -123,8 +123,8 @@ describe('useResize', () => {
       } as PointerEvent<HTMLElement>)
     })
 
-    expect(note.style.width).toBe('120px')
-    expect(note.style.height).toBe('120px')
+    expect(note.style.width).toBe('160px')
+    expect(note.style.height).toBe('160px')
 
     act(() => {
       result.current.handlePointerMove({

@@ -437,7 +437,7 @@ describe('useDrag', () => {
     })
 
     expect(onDrop).toHaveBeenCalledOnce()
-    expect(onDrop).toHaveBeenCalledWith([250, 320])
+    expect(onDrop).toHaveBeenCalledWith([230, 240])
     expect(onDragEnd).not.toHaveBeenCalled()
   })
 })

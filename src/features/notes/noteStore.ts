@@ -30,7 +30,10 @@ export interface NoteState {
 export interface NoteActions {
   readonly createNote: (input: CreateNoteInput) => NoteId
   readonly updateNote: (id: NoteId, changes: NoteChanges) => void
-  readonly deleteNote: (id: NoteId) => DeletedNoteSnapshot | undefined
+  readonly deleteNote: (
+    id: NoteId,
+    snapshot?: DeletedNoteSnapshot,
+  ) => DeletedNoteSnapshot | undefined
   readonly restoreNote: (snapshot: DeletedNoteSnapshot) => void
   readonly discardDeletedNote: (id: NoteId) => void
 }
@@ -103,8 +106,8 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     })
   },
 
-  deleteNote: (id) => {
-    let snapshot: DeletedNoteSnapshot | undefined
+  deleteNote: (id, persistedSnapshot) => {
+    let deletedSnapshot: DeletedNoteSnapshot | undefined
 
     set((state) => {
       const note = state.notesById[id]
@@ -114,7 +117,12 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         return state
       }
 
-      snapshot = { note, index }
+      if (persistedSnapshot && persistedSnapshot.note.id !== id) {
+        return state
+      }
+
+      const snapshot = persistedSnapshot ?? { note, index }
+      deletedSnapshot = snapshot
 
       const notesById = { ...state.notesById }
       delete notesById[id]
@@ -132,7 +140,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       }
     })
 
-    return snapshot
+    return deletedSnapshot
   },
 
   restoreNote: ({ note, index }) => {

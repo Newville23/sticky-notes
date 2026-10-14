@@ -14,6 +14,8 @@ describe('note domain', () => {
   it('defines supported size presets at or above the minimum dimensions', () => {
     const [minimumWidth, minimumHeight] = MIN_NOTE_SIZE
 
+    expect(MIN_NOTE_SIZE).toEqual([160, 160])
+
     for (const [width, height] of Object.values(NOTE_SIZE_PRESETS)) {
       expect(width).toBeGreaterThanOrEqual(minimumWidth)
       expect(height).toBeGreaterThanOrEqual(minimumHeight)

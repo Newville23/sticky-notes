@@ -478,7 +478,7 @@ describe('Note', () => {
     expect(resizeHandle.releasePointerCapture).toHaveBeenCalledWith(9)
   })
 
-  it('deletes the note only when dragging ends inside the delete zone', () => {
+  it('deletes the note only when its border box covers the delete zone threshold', () => {
     const { container } = render(
       <section className="note-canvas">
         <Note id={noteId} />

@@ -1,12 +1,13 @@
 import {
   calculateDragPosition,
+  calculateDeleteZoneOccupancy,
   calculateNoteCreationPosition,
+  calculateRectIntersection,
   calculateResizeDimensions,
   clamp,
   clampPosition,
   getResizeConstraints,
   isFinitePoint,
-  isPointInsideRect,
   isValidDimensions,
 } from './geometry'
 
@@ -39,23 +40,60 @@ describe('geometry', () => {
     })
   })
 
-  describe('isPointInsideRect', () => {
-    const rect = { x: 100, y: 200, width: 160, height: 80 }
+  describe('rectangle intersection and delete-zone occupancy', () => {
+    const deleteZone = { x: 200, y: 300, width: 200, height: 60 }
 
-    it('includes points inside the rectangle and on its edges', () => {
-      expect(isPointInsideRect([180, 240], rect)).toBe(true)
-      expect(isPointInsideRect([100, 200], rect)).toBe(true)
-      expect(isPointInsideRect([260, 280], rect)).toBe(true)
+    it('calculates the overlapping rectangle', () => {
+      expect(
+        calculateRectIntersection(
+          { x: 230, y: 280, width: 160, height: 160 },
+          deleteZone,
+        ),
+      ).toEqual({ x: 230, y: 300, width: 160, height: 60 })
     })
 
-    it('excludes points outside the rectangle', () => {
-      expect(isPointInsideRect([99, 240], rect)).toBe(false)
-      expect(isPointInsideRect([180, 281], rect)).toBe(false)
+    it('returns a zero-area intersection for separated rectangles', () => {
+      expect(
+        calculateRectIntersection(
+          { x: 0, y: 0, width: 160, height: 160 },
+          deleteZone,
+        ),
+      ).toEqual({ x: 200, y: 300, width: 0, height: 0 })
     })
 
-    it('rejects invalid rectangle geometry', () => {
+    it('measures occupancy relative to the delete-zone area', () => {
+      expect(
+        calculateDeleteZoneOccupancy(
+          { x: 230, y: 300, width: 160, height: 160 },
+          deleteZone,
+        ),
+      ).toBe(0.8)
+      expect(
+        calculateDeleteZoneOccupancy(
+          { x: 250, y: 300, width: 160, height: 160 },
+          deleteZone,
+        ),
+      ).toBe(0.75)
+      expect(
+        calculateDeleteZoneOccupancy(
+          { x: 251, y: 300, width: 160, height: 160 },
+          deleteZone,
+        ),
+      ).toBeCloseTo(0.745)
+    })
+
+    it('returns zero for an empty delete zone and rejects invalid rectangles', () => {
+      expect(
+        calculateDeleteZoneOccupancy(
+          { x: 0, y: 0, width: 160, height: 160 },
+          { x: 0, y: 0, width: 0, height: 60 },
+        ),
+      ).toBe(0)
       expect(() =>
-        isPointInsideRect([180, 240], { ...rect, width: -1 }),
+        calculateDeleteZoneOccupancy(
+          { x: 0, y: 0, width: -1, height: 160 },
+          deleteZone,
+        ),
       ).toThrow(RangeError)
     })
   })
@@ -187,7 +225,7 @@ describe('geometry', () => {
   describe('resize geometry', () => {
     it('calculates minimum and maximum dimensions at a position', () => {
       expect(getResizeConstraints([400, 250], [600, 400])).toEqual({
-        minimum: [120, 120],
+        minimum: [160, 150],
         maximum: [200, 150],
       })
     })
@@ -220,7 +258,7 @@ describe('geometry', () => {
           notePosition: [100, 100],
           canvasDimensions: [600, 400],
         }),
-      ).toEqual([120, 120])
+      ).toEqual([160, 160])
     })
 
     it('clamps resized dimensions to the remaining canvas space', () => {

@@ -1,11 +1,20 @@
 import { useCallback, useRef, type RefObject } from 'react'
-import type { NoteId, Point, Rect } from '../../../domain'
-import { isPointInsideRect } from '../geometry'
-import { useNoteStore } from '../noteStore'
+import {
+  DELETE_ZONE_OCCUPANCY_THRESHOLD,
+  type NoteId,
+  type Point,
+  type Rect,
+} from '../../../domain'
+import { calculateDeleteZoneOccupancy } from '../geometry'
+import { useNoteStore, type DeletedNoteSnapshot } from '../noteStore'
+import type { DragSession } from './useDrag'
 
 interface NoteDeleteSession {
   readonly deleteZone: HTMLElement
   readonly deleteZoneBounds: Rect
+  readonly initialNotePosition: Point
+  readonly initialNoteBounds: Rect
+  readonly snapshot: DeletedNoteSnapshot
   isActive: boolean
 }
 
@@ -35,45 +44,76 @@ export function useNoteDelete({ noteId, noteRef }: UseNoteDeleteParams) {
   const sessionRef = useRef<NoteDeleteSession | null>(null)
   const deleteNote = useNoteStore((state) => state.deleteNote)
 
-  const handleDragStart = useCallback(() => {
-    const canvas = noteRef.current?.closest<HTMLElement>('.note-canvas')
-    const deleteZone = canvas?.querySelector<HTMLElement>('[data-delete-zone]')
+  const handleDragStart = useCallback(
+    (dragSession: DragSession) => {
+      const canvas = noteRef.current?.closest<HTMLElement>('.note-canvas')
+      const deleteZone =
+        canvas?.querySelector<HTMLElement>('[data-delete-zone]')
+      const state = useNoteStore.getState()
+      const note = state.notesById[noteId]
+      const index = state.noteIds.indexOf(noteId)
 
-    if (!deleteZone) {
-      return
-    }
+      if (!deleteZone || !note || index === -1) {
+        return
+      }
 
-    const deleteZoneBounds = toRect(deleteZone.getBoundingClientRect())
+      const deleteZoneBounds = toRect(deleteZone.getBoundingClientRect())
 
-    deleteZone.classList.add('delete-zone--visible')
-    deleteZone.setAttribute('aria-hidden', 'false')
-    sessionRef.current = {
-      deleteZone,
-      deleteZoneBounds,
-      isActive: false,
-    }
-  }, [noteRef])
+      deleteZone.classList.add('delete-zone--visible')
+      deleteZone.setAttribute('aria-hidden', 'false')
+      sessionRef.current = {
+        deleteZone,
+        deleteZoneBounds,
+        initialNotePosition: dragSession.initialNotePosition,
+        initialNoteBounds: dragSession.noteBounds,
+        snapshot: { note, index },
+        isActive: false,
+      }
+    },
+    [noteId, noteRef],
+  )
 
-  const handleDragMove = useCallback((pointerPosition: Point) => {
-    const session = sessionRef.current
+  const getOccupancy = useCallback(
+    (session: NoteDeleteSession, position: Point) => {
+      const noteRect: Rect = {
+        x:
+          session.initialNoteBounds.x +
+          position[0] -
+          session.initialNotePosition[0],
+        y:
+          session.initialNoteBounds.y +
+          position[1] -
+          session.initialNotePosition[1],
+        width: session.initialNoteBounds.width,
+        height: session.initialNoteBounds.height,
+      }
 
-    if (!session) {
-      return
-    }
+      return calculateDeleteZoneOccupancy(noteRect, session.deleteZoneBounds)
+    },
+    [],
+  )
 
-    const isActive = isPointInsideRect(
-      pointerPosition,
-      session.deleteZoneBounds,
-    )
+  const handleDragMove = useCallback(
+    (position: Point) => {
+      const session = sessionRef.current
 
-    if (isActive !== session.isActive) {
-      session.isActive = isActive
-      session.deleteZone.classList.toggle('delete-zone--active', isActive)
-    }
-  }, [])
+      if (!session) {
+        return
+      }
+
+      const isActive =
+        getOccupancy(session, position) >= DELETE_ZONE_OCCUPANCY_THRESHOLD
+
+      if (isActive !== session.isActive) {
+        session.isActive = isActive
+        session.deleteZone.classList.toggle('delete-zone--active', isActive)
+      }
+    },
+    [getOccupancy],
+  )
 
   const handleDrop = useCallback(
-    (pointerPosition: Point): boolean => {
+    (position: Point): boolean => {
       const session = sessionRef.current
 
       if (!session) {
@@ -81,22 +121,20 @@ export function useNoteDelete({ noteId, noteRef }: UseNoteDeleteParams) {
       }
 
       sessionRef.current = null
-      const shouldDelete = isPointInsideRect(
-        pointerPosition,
-        session.deleteZoneBounds,
-      )
+      const shouldDelete =
+        getOccupancy(session, position) >= DELETE_ZONE_OCCUPANCY_THRESHOLD
 
       try {
         if (!shouldDelete) {
           return false
         }
 
-        return Boolean(deleteNote(noteId))
+        return Boolean(deleteNote(noteId, session.snapshot))
       } finally {
         hideDeleteZone(session)
       }
     },
-    [deleteNote, noteId],
+    [deleteNote, getOccupancy, noteId],
   )
 
   const handleDragCancel = useCallback(() => {

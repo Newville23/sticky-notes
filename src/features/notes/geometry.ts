@@ -55,16 +55,39 @@ export function isValidDimensions(value: unknown): value is Dimensions {
   )
 }
 
-export function isPointInsideRect(point: Point, rect: Rect): boolean {
-  assertPoint(point, 'Point')
-  assertRect(rect, 'Rectangle')
+export function calculateRectIntersection(first: Rect, second: Rect): Rect {
+  assertRect(first, 'First rectangle')
+  assertRect(second, 'Second rectangle')
 
-  return (
-    point[0] >= rect.x &&
-    point[0] <= rect.x + rect.width &&
-    point[1] >= rect.y &&
-    point[1] <= rect.y + rect.height
-  )
+  const x = Math.max(first.x, second.x)
+  const y = Math.max(first.y, second.y)
+  const right = Math.min(first.x + first.width, second.x + second.width)
+  const bottom = Math.min(first.y + first.height, second.y + second.height)
+
+  return {
+    x,
+    y,
+    width: Math.max(0, right - x),
+    height: Math.max(0, bottom - y),
+  }
+}
+
+export function calculateDeleteZoneOccupancy(
+  noteRect: Rect,
+  deleteZoneRect: Rect,
+): number {
+  assertRect(noteRect, 'Note rectangle')
+  assertRect(deleteZoneRect, 'Delete-zone rectangle')
+
+  const deleteZoneArea = deleteZoneRect.width * deleteZoneRect.height
+
+  if (deleteZoneArea === 0) {
+    return 0
+  }
+
+  const intersection = calculateRectIntersection(noteRect, deleteZoneRect)
+
+  return (intersection.width * intersection.height) / deleteZoneArea
 }
 
 export function clamp(value: number, minimum: number, maximum: number): number {

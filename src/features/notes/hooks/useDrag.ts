@@ -15,9 +15,9 @@ export interface UseDragParams {
   readonly noteRef: RefObject<HTMLElement | null>
   readonly initialNotePosition: Point
   readonly onDragEnd: (position: Point) => void
-  readonly onDragStart?: () => void
-  readonly onDragMove?: (pointerPosition: Point) => void
-  readonly onDrop?: (pointerPosition: Point) => boolean
+  readonly onDragStart?: (session: DragSession) => void
+  readonly onDragMove?: (position: Point) => void
+  readonly onDrop?: (position: Point) => boolean
   readonly onDragCancel?: () => void
 }
 
@@ -72,7 +72,7 @@ export function useDrag({
         noteBounds: toRect(noteBounds),
         canvasBounds: toRect(canvasBounds),
       }
-      onDragStart?.()
+      onDragStart?.(sessionRef.current)
       event.preventDefault()
     },
     [initialNotePosition, noteRef, onDragStart],
@@ -100,7 +100,7 @@ export function useDrag({
 
       session.currentPosition = position
       noteElement.style.transform = `translate3d(${position[0]}px, ${position[1]}px, 0)`
-      onDragMove?.([event.clientX, event.clientY])
+      onDragMove?.(position)
     },
     [noteRef, onDragMove],
   )
@@ -119,8 +119,7 @@ export function useDrag({
       sessionRef.current = null
 
       try {
-        const dropHandled =
-          commit && onDrop?.([event.clientX, event.clientY]) === true
+        const dropHandled = commit && onDrop?.(finalPosition) === true
 
         if (
           commit &&
