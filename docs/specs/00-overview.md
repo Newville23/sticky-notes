@@ -7,12 +7,13 @@ The application must prioritize, simplicity, predictability, small bundle size a
 
 ## Scope
 The application must support:
-- creating one note at a time from an explicit toolbar action.
+- creating one note at a time from the toolbar or by double-clicking an empty canvas position.
 - selecting a note size from S, M, L or XL.
 - selecting a note color background from yellow, green and red.
 - default note configuration: S size and yellow background.
 - entering and editing note content.
 - editing note color and size.
+- selecting a note and explicitly bringing it in front of overlapping notes.
 - moving notes through drag interactions.
 - resizing notes through drag interactions.
 - deleting notes by dragging them into a visible delete zone.
@@ -66,7 +67,7 @@ interface NoteState {
   noteIds: NoteId[];
 }
 ```
-The canvas component should subscribe primarilly to the noteIds slice. In the other hand Notes will be individually subscribe only to their own state using the ID as key. Lastly ephemeral interactions such as active pointer position, cached geometry, and drag coordinates must remain out of the global state.
+The canvas component should subscribe primarilly to the noteIds slice. `noteIds` defines visual stacking order from back to front. In the other hand Notes will be individually subscribe only to their own state using the ID as key. Lastly ephemeral interactions such as note selection, active pointer position, cached geometry, and drag coordinates must remain outside persisted note state.
 
 ## interactions Rules
 For the core interactions such as dragging and resizing application must use pointer events.
@@ -173,8 +174,9 @@ The application targets desktop browsers only. The minimum supported viewport is
 ## Definition of Done
 The application is complete when all feature specifications pass their acceptance criteria and the following conditions are met:
 
-- users can create notes from the toolbar and immediately enter content.
+- users can create notes from the toolbar or empty-canvas double-click and immediately enter content.
 - users can edit, move, resize, delete, and restore notes.
+- users can select a note and explicitly bring it in front of overlapping notes.
 - notes cannot leave the canvas or become inaccessible.
 - drag interactions do not trigger global state writes until the interaction is complete.
 - updating one note does not rerender unrelated notes.

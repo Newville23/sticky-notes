@@ -1,19 +1,23 @@
 # Note Creation and Content Entry
 
 ## Goal
-Allow the user to explicitly create one note at a time using the active toolbar
-configuration and immediately enter its content.
+Allow the user to create one note at a time using the active toolbar configuration
+and immediately enter its content.
 
 ## Rules
 
 - default configuration is `S` size and yellow background.
 - toolbar allows selecting `S`, `M`, `L`, or `XL` before creation.
 - toolbar provides an explicit `Add note` button.
-- the `Add note` button is the only note-creation mechanism.
-- clicking an empty position inside the canvas must not create a note.
+- notes may be created with the `Add note` button or by double-clicking the empty canvas with the primary pointer button.
+- a single click on an empty canvas position must not create a note.
 - the first note is centered in the canvas using its selected dimensions.
 - subsequent notes use a deterministic diagonal cascading offset from the previous creation position so changing the selected size does not reset or reverse the cascade.
-- placement must not depend on the pointer position.
+- toolbar creation must not depend on the pointer position.
+- double-click creation uses the pointer position as the desired center of the note.
+- double-clicking a note, editor, resize handle, toolbar, or delete zone must not create a note.
+- double-click creation must not occur while another pointer interaction is active.
+- direct placement may overlap existing notes and must not advance or reset the toolbar cascade.
 - the complete note must remain inside canvas boundaries.
 - each note must receive a unique immutable ID (crypto.randomUUID).
 - the new note must be added to both `notesById` and `noteIds`.
@@ -35,6 +39,14 @@ configuration and immediately enter its content.
 **Given** a selected size or color  
 **When** the user activates `Add note`  
 **Then** the note uses the selected configuration.
+
+**Given** a selected size and color\
+**When** the user double-clicks an empty canvas position\
+**Then** one note is created with those attributes, centered as closely as canvas boundaries allow, and its editor receives focus.
+
+**Given** a double-click on a note or another interactive canvas child\
+**When** the event occurs\
+**Then** no note is created.
 
 **Given** a calculated creation position that would exceed a canvas boundary  
 **When** the note is created  
@@ -69,5 +81,5 @@ configuration and immediately enter its content.
 **Then** the content remains literal plain text and is never interpreted as markup.
 
 **Given** any canvas state  
-**When** the user clicks an empty canvas position  
+**When** the user single-clicks an empty canvas position\
 **Then** no note is created.

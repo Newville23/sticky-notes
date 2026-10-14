@@ -56,7 +56,7 @@
 ## 7. Validation
 
 - Add unit tests for geometry, creation placement and cascading, store behavior, resize constraints, deletion snapshots, and undo timing.
-- Verify toolbar creation with the active configuration, centered and clamped placement, mixed-size cascading, and no creation from empty-canvas clicks.
+- Verify toolbar creation with the active configuration, centered and clamped placement, mixed-size cascading, and no creation from single empty-canvas clicks.
 - Verify that newly created note editors receive focus and that editor pointer activity does not initiate dragging.
 - Verify plain-text content validation, the 2,000-character limit, null-character rejection, and literal rendering of HTML-like content without `innerHTML` or `dangerouslySetInnerHTML`.
 - Verify that typing causes zero Zustand writes and that blur commits valid content exactly once without rerendering unrelated notes.
@@ -64,3 +64,34 @@
 - Verify zero React state updates, zero Zustand writes, and no repeated layout measurements during `pointermove`.
 - Verify a single global-state commit on interaction completion and narrow rerenders so updating one note does not rerender unrelated notes.
 - Run smoke tests in the latest stable Chrome and Firefox at the minimum supported viewport of `1024 × 768`.
+
+## 8. Delete-Zone Occupancy Refinement
+
+- Increase the minimum note dimensions from `120 × 120` to `160 × 160` pixels.
+- Add pure geometry utilities for rectangle intersection and delete-zone occupancy.
+- Replace pointer-based deletion detection with note-rectangle occupancy using a `75%` threshold.
+- Cache the delete-zone bounds at drag start and derive the moving note rectangle without layout reads during `pointermove`.
+- Activate the delete zone when the threshold is reached, but delete only on `pointerup`.
+- Commit movement normally below the threshold and preserve cancellation rollback and pointer-capture cleanup.
+- Store the pre-drag persisted note snapshot for undo.
+- Add geometry and interaction tests for threshold boundaries, minimum-size feasibility, deletion, non-deletion, cancellation, and undo restoration.
+
+## 9. Canvas Double-Click Creation Refinement
+
+- Add pure geometry for cursor-centered note placement with canvas-boundary clamping.
+- Add an explicit creation-position strategy so direct placement remains independent from toolbar cascading.
+- Create one note on a primary-button double-click directly on the empty canvas.
+- Use the active toolbar size and color and focus the new note editor immediately.
+- Ignore double-clicks from notes, editors, resize handles, toolbar controls, the delete zone, or active pointer interactions.
+- Keep single empty-canvas clicks inactive and allow direct placement to overlap existing notes.
+- Add geometry and interaction tests for centered placement, edge clamping, selected attributes, event scoping, cascade independence, focus, and exactly-one-note creation.
+
+## 10. Individual Undo Toasts
+
+- Extend each undo-buffer entry with a stable, monotonically increasing session deletion number.
+- Replace the single latest-deletion undo button with one `Undo delete (N)` toast per recoverable deletion.
+- Render toasts in a predictable stack and associate each action with its exact deleted-note snapshot.
+- Restore only the selected toast's note and remove only that undo-buffer entry.
+- Expire and clean up each toast and snapshot independently after 5 seconds.
+- Announce new undo notifications through a polite live region without moving keyboard focus.
+- Add store, timer, interaction, ordering, accessibility, and cleanup tests for multiple simultaneous undo toasts.
