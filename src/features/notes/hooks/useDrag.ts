@@ -1,6 +1,10 @@
 import { useCallback, useRef, type PointerEvent, type RefObject } from 'react'
 import type { Point, Rect } from '../../../domain'
 import { calculateDragPosition } from '../geometry'
+import {
+  beginPointerInteraction,
+  endPointerInteraction,
+} from '../pointerInteraction'
 
 export interface DragSession {
   readonly pointerId: number
@@ -72,6 +76,7 @@ export function useDrag({
         noteBounds: toRect(noteBounds),
         canvasBounds: toRect(canvasBounds),
       }
+      beginPointerInteraction(canvasElement, captureElement)
       onDragStart?.(sessionRef.current)
       event.preventDefault()
     },
@@ -134,6 +139,8 @@ export function useDrag({
           onDragCancel?.()
         }
       } finally {
+        endPointerInteraction(event.currentTarget)
+
         if (noteElement) {
           noteElement.style.transform = ''
         }
@@ -169,6 +176,8 @@ export function useDrag({
         try {
           onDragCancel?.()
         } finally {
+          endPointerInteraction(event.currentTarget)
+
           if (noteElement) {
             noteElement.style.transform = ''
           }

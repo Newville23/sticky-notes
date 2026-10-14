@@ -1,4 +1,4 @@
-import { memo, type Ref } from 'react'
+import { memo, type MouseEventHandler, type Ref } from 'react'
 import { DeleteZone } from '../DeleteZone'
 import { Note } from '../Note'
 import { useNoteStore } from '../noteStore'
@@ -6,13 +6,22 @@ import './NoteCanvas.css'
 
 export interface NoteCanvasProps {
   readonly ref?: Ref<HTMLElement>
+  readonly onDoubleClick?: MouseEventHandler<HTMLElement>
 }
 
-export const NoteCanvas = memo(function NoteCanvas({ ref }: NoteCanvasProps) {
+export const NoteCanvas = memo(function NoteCanvas({
+  ref,
+  onDoubleClick,
+}: NoteCanvasProps) {
   const noteIds = useNoteStore((state) => state.noteIds)
 
   return (
-    <section ref={ref} className="note-canvas" aria-label="Sticky notes canvas">
+    <section
+      ref={ref}
+      className="note-canvas"
+      aria-label="Sticky notes canvas"
+      onDoubleClick={onDoubleClick}
+    >
       {noteIds.length === 0 ? (
         <div className="note-canvas__empty">
           <span className="note-canvas__empty-mark" aria-hidden="true"></span>

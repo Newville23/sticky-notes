@@ -31,9 +31,19 @@ export interface CalculateResizeDimensionsParams {
 export interface CalculateNoteCreationPositionParams {
   readonly noteDimensions: Dimensions
   readonly canvasDimensions: Dimensions
-  readonly previousPosition?: Point
-  readonly cascadeOffset?: number
+  readonly strategy: NoteCreationPositionStrategy
 }
+
+export type NoteCreationPositionStrategy =
+  | {
+      readonly type: 'cascade'
+      readonly previousPosition?: Point
+      readonly offset?: number
+    }
+  | {
+      readonly type: 'direct'
+      readonly center: Point
+    }
 
 export function isFinitePoint(value: unknown): value is Point {
   return (
@@ -127,19 +137,10 @@ export function clampPosition(
 export function calculateNoteCreationPosition({
   noteDimensions,
   canvasDimensions,
-  previousPosition,
-  cascadeOffset = NOTE_CREATION_CASCADE_OFFSET,
+  strategy,
 }: CalculateNoteCreationPositionParams): Point {
   assertDimensions(noteDimensions, 'Note dimensions')
   assertDimensions(canvasDimensions, 'Canvas dimensions')
-
-  if (previousPosition) {
-    assertPoint(previousPosition, 'Previous position')
-  }
-
-  if (!Number.isFinite(cascadeOffset) || cascadeOffset < 0) {
-    throw new RangeError('Cascade offset must be a finite, non-negative number')
-  }
 
   const [noteWidth, noteHeight] = noteDimensions
   const [canvasWidth, canvasHeight] = canvasDimensions
@@ -147,9 +148,34 @@ export function calculateNoteCreationPosition({
     (canvasWidth - noteWidth) / 2,
     (canvasHeight - noteHeight) / 2,
   ]
-  const position: Point = previousPosition
-    ? [previousPosition[0] + cascadeOffset, previousPosition[1] + cascadeOffset]
-    : centeredPosition
+  let position: Point
+
+  if (strategy.type === 'direct') {
+    assertPoint(strategy.center, 'Direct-placement center')
+    position = [
+      strategy.center[0] - noteWidth / 2,
+      strategy.center[1] - noteHeight / 2,
+    ]
+  } else {
+    const offset = strategy.offset ?? NOTE_CREATION_CASCADE_OFFSET
+
+    if (strategy.previousPosition) {
+      assertPoint(strategy.previousPosition, 'Previous position')
+    }
+
+    if (!Number.isFinite(offset) || offset < 0) {
+      throw new RangeError(
+        'Cascade offset must be a finite, non-negative number',
+      )
+    }
+
+    position = strategy.previousPosition
+      ? [
+          strategy.previousPosition[0] + offset,
+          strategy.previousPosition[1] + offset,
+        ]
+      : centeredPosition
+  }
 
   return clampPosition(position, noteDimensions, canvasDimensions)
 }

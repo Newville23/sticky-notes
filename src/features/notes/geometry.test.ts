@@ -148,6 +148,7 @@ describe('geometry', () => {
         calculateNoteCreationPosition({
           noteDimensions: [160, 160],
           canvasDimensions: [600, 400],
+          strategy: { type: 'cascade' },
         }),
       ).toEqual([220, 120])
     })
@@ -157,7 +158,7 @@ describe('geometry', () => {
         calculateNoteCreationPosition({
           noteDimensions: [160, 160],
           canvasDimensions: [600, 400],
-          previousPosition: [220, 120],
+          strategy: { type: 'cascade', previousPosition: [220, 120] },
         }),
       ).toEqual([244, 144])
     })
@@ -167,7 +168,7 @@ describe('geometry', () => {
         calculateNoteCreationPosition({
           noteDimensions: [380, 380],
           canvasDimensions: [1_024, 768],
-          previousPosition: [432, 304],
+          strategy: { type: 'cascade', previousPosition: [432, 304] },
         }),
       ).toEqual([456, 328])
     })
@@ -177,8 +178,11 @@ describe('geometry', () => {
         calculateNoteCreationPosition({
           noteDimensions: [160, 160],
           canvasDimensions: [600, 400],
-          previousPosition: [220, 120],
-          cascadeOffset: 10,
+          strategy: {
+            type: 'cascade',
+            previousPosition: [220, 120],
+            offset: 10,
+          },
         }),
       ).toEqual([230, 130])
     })
@@ -188,7 +192,7 @@ describe('geometry', () => {
         calculateNoteCreationPosition({
           noteDimensions: [380, 380],
           canvasDimensions: [400, 400],
-          previousPosition: [100, 100],
+          strategy: { type: 'cascade', previousPosition: [100, 100] },
         }),
       ).toEqual([20, 20])
     })
@@ -198,7 +202,7 @@ describe('geometry', () => {
         calculateNoteCreationPosition({
           noteDimensions: [700, 500],
           canvasDimensions: [600, 400],
-          previousPosition: [100, 100],
+          strategy: { type: 'cascade', previousPosition: [100, 100] },
         }),
       ).toEqual([0, 0])
     })
@@ -208,7 +212,10 @@ describe('geometry', () => {
         calculateNoteCreationPosition({
           noteDimensions: [160, 160],
           canvasDimensions: [600, 400],
-          previousPosition: [Number.NaN, 0],
+          strategy: {
+            type: 'cascade',
+            previousPosition: [Number.NaN, 0],
+          },
         }),
       ).toThrow(RangeError)
 
@@ -216,9 +223,36 @@ describe('geometry', () => {
         calculateNoteCreationPosition({
           noteDimensions: [160, 160],
           canvasDimensions: [600, 400],
-          cascadeOffset: Number.NaN,
+          strategy: { type: 'cascade', offset: Number.NaN },
         }),
       ).toThrow(RangeError)
+    })
+
+    it('centers direct placement on the cursor position', () => {
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [160, 160],
+          canvasDimensions: [600, 400],
+          strategy: { type: 'direct', center: [300, 200] },
+        }),
+      ).toEqual([220, 120])
+    })
+
+    it('clamps direct placement at every canvas edge', () => {
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [160, 160],
+          canvasDimensions: [600, 400],
+          strategy: { type: 'direct', center: [10, 10] },
+        }),
+      ).toEqual([0, 0])
+      expect(
+        calculateNoteCreationPosition({
+          noteDimensions: [160, 160],
+          canvasDimensions: [600, 400],
+          strategy: { type: 'direct', center: [590, 390] },
+        }),
+      ).toEqual([440, 240])
     })
   })
 

@@ -1,6 +1,10 @@
 import { useCallback, useRef, type PointerEvent, type RefObject } from 'react'
 import type { Dimensions, Point, Rect } from '../../../domain'
 import { calculateResizeDimensions } from '../geometry'
+import {
+  beginPointerInteraction,
+  endPointerInteraction,
+} from '../pointerInteraction'
 
 export interface ResizeSession {
   readonly pointerId: number
@@ -64,6 +68,7 @@ export function useResize({
         currentDimensions: initialDimensions,
         canvasBounds: toRect(canvasBounds),
       }
+      beginPointerInteraction(canvasElement, captureElement)
       event.preventDefault()
     },
     [initialDimensions, notePosition, noteRef],
@@ -118,6 +123,8 @@ export function useResize({
           onResizeEnd(finalDimensions)
         }
       } finally {
+        endPointerInteraction(event.currentTarget)
+
         if (noteElement) {
           noteElement.style.width = ''
           noteElement.style.height = ''
@@ -153,6 +160,7 @@ export function useResize({
 
       sessionRef.current = null
       const noteElement = noteRef.current
+      endPointerInteraction(event.currentTarget)
 
       if (noteElement) {
         noteElement.style.width = ''

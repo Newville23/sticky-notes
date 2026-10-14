@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, type MouseEvent } from 'react'
 import { Toolbar } from '../../../components/Toolbar'
 import {
   DEFAULT_NOTE_CONTENT,
@@ -8,6 +8,7 @@ import {
 import { calculateNoteCreationPosition } from '../geometry'
 import { NoteCanvas } from '../NoteCanvas'
 import { NoteControls } from '../NoteControls'
+import { hasActivePointerInteraction } from '../pointerInteraction'
 import {
   DEFAULT_NOTE_CREATION_CONFIGURATION,
   type NoteCreationConfiguration,
@@ -34,20 +35,17 @@ export function NotesWorkspace() {
       return
     }
 
-    const { noteIds, notesById, createNote } = useNoteStore.getState()
+    const { createNote } = useNoteStore.getState()
     const configuration = creationConfigurationRef.current
     const dimensions = NOTE_SIZE_PRESETS[configuration.size]
     const canvasBounds = canvas.getBoundingClientRect()
-    const lastNoteId = noteIds.at(-1)
-    const previousPosition =
-      noteIds.length === 0
-        ? undefined
-        : (lastCreationPositionRef.current ??
-          (lastNoteId ? notesById[lastNoteId]?.position : undefined))
     const position = calculateNoteCreationPosition({
       noteDimensions: dimensions,
       canvasDimensions: [canvasBounds.width, canvasBounds.height],
-      previousPosition,
+      strategy: {
+        type: 'cascade',
+        previousPosition: lastCreationPositionRef.current ?? undefined,
+      },
     })
 
     createNote({
@@ -58,6 +56,40 @@ export function NotesWorkspace() {
     })
     lastCreationPositionRef.current = position
   }, [])
+  const handleCanvasDoubleClick = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      if (
+        event.button !== 0 ||
+        event.target !== event.currentTarget ||
+        hasActivePointerInteraction(event.currentTarget)
+      ) {
+        return
+      }
+
+      const canvasBounds = event.currentTarget.getBoundingClientRect()
+      const configuration = creationConfigurationRef.current
+      const dimensions = NOTE_SIZE_PRESETS[configuration.size]
+      const position = calculateNoteCreationPosition({
+        noteDimensions: dimensions,
+        canvasDimensions: [canvasBounds.width, canvasBounds.height],
+        strategy: {
+          type: 'direct',
+          center: [
+            event.clientX - canvasBounds.left,
+            event.clientY - canvasBounds.top,
+          ],
+        },
+      })
+
+      useNoteStore.getState().createNote({
+        content: DEFAULT_NOTE_CONTENT,
+        position,
+        dimensions,
+        background: configuration.background,
+      })
+    },
+    [],
+  )
 
   return (
     <main className="notes-workspace">
@@ -67,7 +99,7 @@ export function NotesWorkspace() {
           onAddNote={handleAddNote}
         />
       </Toolbar>
-      <NoteCanvas ref={canvasRef} />
+      <NoteCanvas ref={canvasRef} onDoubleClick={handleCanvasDoubleClick} />
     </main>
   )
 }
